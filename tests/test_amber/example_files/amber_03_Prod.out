@@ -14,48 +14,48 @@
   [-O]verwriting output
 
 File Assignments:
-|   MDIN: input_files/03_Prod.in                                                
-|  MDOUT: 03_Prod.out                                                           
-| INPCRD: 02_Heat.ncrst                                                         
-|   PARM: parm7                                                                 
-| RESTRT: 03_Prod.ncrst                                                         
-|   REFC: refc                                                                  
-|  MDVEL: mdvel                                                                 
-|   MDEN: mden                                                                  
-|  MDCRD: 03_Prod.nc                                                            
-| MDINFO: 03_Prod.info                                                          
-|  MDFRC: mdfrc                                                                 
+|   MDIN: input_files/03_Prod.in
+|  MDOUT: 03_Prod.out
+| INPCRD: 02_Heat.ncrst
+|   PARM: parm7
+| RESTRT: 03_Prod.ncrst
+|   REFC: refc
+|  MDVEL: mdvel
+|   MDEN: mden
+|  MDCRD: 03_Prod.nc
+| MDINFO: 03_Prod.info
+|  MDFRC: mdfrc
 
 
  Here is the input file:
 
-Production                                                                     
- &cntrl                                                                        
-  imin=0,                                                                      
-  ntx=5,                                                                       
-  irest=1,                                                                     
-  nstlim=5000,                                                                 
-  dt=0.002,                                                                    
-  ntf=2,                                                                       
-  ntc=2,                                                                       
-  temp0=300.0,                                                                 
-  ntpr=100,                                                                    
-  ntwx=100,                                                                    
-  cut=8.0,                                                                     
-  ntb=2,                                                                       
-  ntp=1,                                                                       
-  ntt=3,                                                                       
-  barostat=1,                                                                  
-  gamma_ln=2.0,                                                                
-  ig=-1,                                                                       
- /                                                                             
+Production
+ &cntrl
+  imin=0,
+  ntx=5,
+  irest=1,
+  nstlim=5000,
+  dt=0.002,
+  ntf=2,
+  ntc=2,
+  temp0=300.0,
+  ntpr=100,
+  ntwx=100,
+  cut=8.0,
+  ntb=2,
+  ntp=1,
+  ntt=3,
+  barostat=1,
+  gamma_ln=2.0,
+  ig=-1,
+ /
 
 
-Note: ig = -1. Setting random seed to   692048 based on wallclock time in 
+Note: ig = -1. Setting random seed to   692048 based on wallclock time in
       microseconds.
 | irandom = 1, using AMBER's internal random number generator (default).
- 
- 
+
+
 | Conditional Compilation Defines Used:
 | PUBFFT
 | BINTRAJ
@@ -75,7 +75,7 @@ Note: ig = -1. Setting random seed to   692048 based on wallclock time in
 | Duplicated    0 dihedrals
 
 --------------------------------------------------------------------------------
-   1.  RESOURCE   USE: 
+   1.  RESOURCE   USE:
 --------------------------------------------------------------------------------
 
  getting box info from netcdf restart file
@@ -97,7 +97,7 @@ Note: ig = -1. Setting random seed to   692048 based on wallclock time in
    2.  CONTROL  DATA  FOR  THE  RUN
 --------------------------------------------------------------------------------
 
-ACE                                                                             
+ACE
 
 General flags:
      imin    =       0, nmropt  =       0
@@ -169,10 +169,10 @@ Ewald parameters:
    3.  ATOMIC COORDINATES AND VELOCITIES
 --------------------------------------------------------------------------------
 
-ACE                                                                             
+ACE
  begin time read from input coords =    20.000 ps
 
- 
+
  Number of triangulated 3-point waters found:      699
 
      Sum of charges from parm topology file =   0.00000384

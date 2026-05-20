@@ -1,5 +1,6 @@
 import re
 
+
 def parse_value(val):
     """
     Attempt to cast a string value to bool, float, int, or list.
@@ -33,6 +34,7 @@ def parse_value(val):
     except Exception:
         return val
 
+
 def add_value(d, key, value):
     """
     Add a value to a dictionary, promoting to a list if the key already exists.
@@ -50,6 +52,7 @@ def add_value(d, key, value):
     else:
         d[key] = value
 
+
 def normalize_name(name):
     """
     Normalize a string to a valid key by replacing non-word characters with underscores.
@@ -62,6 +65,7 @@ def normalize_name(name):
     """
     return re.sub(r"\W+", "_", name.strip()).strip("_")
 
+
 def get_array(val):
     """
     Convert a brace-enclosed string of comma-separated numbers to a list of floats.
@@ -72,7 +76,7 @@ def get_array(val):
     Returns:
         list: List of floats, or the original string if no braces are found.
     """
-    start, end = val.find('{'), val.find('}')
+    start, end = val.find("{"), val.find("}")
     if start == -1 or end == -1:
         return val
-    return [float(x.strip()) for x in val[start+1:end].split(',') if x.strip()]
+    return [float(x.strip()) for x in val[start + 1 : end].split(",") if x.strip()]

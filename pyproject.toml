@@ -37,6 +37,7 @@ dependencies = [
     "MDAnalysis==2.10.0",
     "biopython==1.87",
     "rdkit>=2025.9.5",
+    "linkml==1.10.0",
 ]
 
 [project.urls]
@@ -70,10 +71,10 @@ docs = [
 
 # Run `example-cli` mapped to a Python function
 [project.scripts]
-populatemetadata = "biosim_extractor.metadata.populatemetadata:main" 
+populatemetadata = "biosim_extractor.metadata.populatemetadata:main"
 extract-toptraj = "biosim_extractor.mdanalysis.toptraj:main"  # Uncomment and modify if you add CLI scripts
 extract-amberlog = "biosim_extractor.amber.amberlog:main"  # Uncomment and modify if you add CLI scripts
-extract-gromacslog = "biosim_extractor.gromacs.gromacslog:main"  
+extract-gromacslog = "biosim_extractor.gromacs.gromacslog:main"
 
 #
 # Ruff configuration inside pyproject (recommended)

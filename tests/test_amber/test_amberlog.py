@@ -1,8 +1,8 @@
-import tempfile
 import os
-import json
-import pytest
+import tempfile
+
 from biosim_extractor.amber.amberlog import AmberLogParser
+
 
 # Helper to write a temporary log file
 def write_temp_log(content: str) -> str:
@@ -10,6 +10,7 @@ def write_temp_log(content: str) -> str:
     with os.fdopen(fd, "w") as f:
         f.write(content)
     return path
+
 
 def test_parse_simulation_settings_and_file_assignments():
     log_content = """
@@ -38,6 +39,7 @@ def test_parse_simulation_settings_and_file_assignments():
     assert fa["OUTF"] == "output.out"
     assert fa["REST"] == "restrt.rst"
 
+
 def test_parse_block_and_timings():
     log_content = """
 A V E R A G E S
@@ -59,6 +61,7 @@ R M S  F L U C T U A T I O N S
     assert "Total_wall_time" in results["Timings"]
     assert results["Timings"]["Total_wall_time"] == 15.67
 
+
 def test_parse_time_series():
     log_content = """
 NSTEP = 1 TIME = 0.0 TEMP = 300.0
@@ -76,16 +79,19 @@ A V E R A G E S
     assert ts[0]["NSTEP"] == 1
     assert ts[1]["TEMP"] == 301.0
 
+
 def test_parse_full_log(monkeypatch):
     # Patch out helpers to avoid import errors if helpers are not present
-    import builtins
     import types
+
     dummy_helpers = types.SimpleNamespace(
         parse_value=lambda x: float(x) if "." in x or "e" in x.lower() else int(x),
         add_value=lambda d, k, v: d.setdefault(k, v),
-        normalize_name=lambda x: x.strip().replace(" ", "_")
+        normalize_name=lambda x: x.strip().replace(" ", "_"),
     )
-    monkeypatch.setitem(__import__("sys").modules, "biosim_extractor.helpers.log_utils", dummy_helpers)
+    monkeypatch.setitem(
+        __import__("sys").modules, "biosim_extractor.helpers.log_utils", dummy_helpers
+    )
 
     log_content = """
  &cntrl

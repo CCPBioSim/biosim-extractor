@@ -2,10 +2,11 @@
 """
 Validation utilities for extracted MD simulation metadata against the biosim LinkML schema.
 """
+
 import os
 import warnings
-from linkml.validator import validate
 
+from linkml.validator import validate
 
 
 def validate_metadata(result, biosimschema_path=None, strict=False):
@@ -23,9 +24,9 @@ def validate_metadata(result, biosimschema_path=None, strict=False):
         errors = validate_extracted(result, biosimschema_path)
         if errors:
             if strict:
-                raise ValueError(f"Schema validation failed:\n" + "\n".join(errors))
+                raise ValueError("Schema validation failed:\n" + "\n".join(errors))
             else:
-                warnings.warn(f"Schema validation warnings:\n" + "\n".join(errors))
+                warnings.warn("Schema validation warnings:\n" + "\n".join(errors))
 
 
 def validate_extracted(instance, schema_path):
@@ -153,7 +154,12 @@ def _strip_all_matrix_vector_values(instance):
         return instance
     result = {}
     for key, value in instance.items():
-        if key == "vector_value" and isinstance(value, list) and value and isinstance(value[0], list):
+        if (
+            key == "vector_value"
+            and isinstance(value, list)
+            and value
+            and isinstance(value[0], list)
+        ):
             continue  # drop nested array
         elif isinstance(value, dict):
             result[key] = _strip_all_matrix_vector_values(value)

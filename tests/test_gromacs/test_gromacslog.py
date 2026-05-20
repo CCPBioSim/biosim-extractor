@@ -1,20 +1,23 @@
-import os
-import pytest
 import json
+import os
+
+import pytest
+
 from biosim_extractor.gromacs.gromacslog import GromacsLogParser, main
+
 
 @pytest.fixture(scope="module")
 def log_path():
     return os.path.join(
-        os.path.dirname(__file__),
-        "example_files",
-        "1AKI_production.log"
+        os.path.dirname(__file__), "example_files", "1AKI_production.log"
     )
+
 
 @pytest.fixture(scope="module")
 def parsed_data(log_path):
     parser = GromacsLogParser(log_path)
     return parser.parse()
+
 
 def test_missing_input_parameters(monkeypatch, tmp_path):
     # Log with no Input Parameters or qm-opts
@@ -28,6 +31,7 @@ def test_missing_input_parameters(monkeypatch, tmp_path):
     # Should not contain Input Parameters
     assert "Input Parameters" not in data
 
+
 def test_partial_indented_block(tmp_path):
     # Log with incomplete indented block
     log = "Input Parameters:\n  integrator: md\n  nsteps:\n"
@@ -40,6 +44,7 @@ def test_partial_indented_block(tmp_path):
     # nsteps should be present but None or empty string
     assert "nsteps" in data["Input Parameters"]
 
+
 def test_summary_only(tmp_path):
     # Log with only summary section
     log = "Performance:  123.4  0.56\nTime:\n  111.1  222.2\n"
@@ -50,6 +55,7 @@ def test_summary_only(tmp_path):
     assert "Summary" in data
     assert data["Summary"]["Performance"]["(ns/day)"] == 123.4
     assert data["Summary"]["Time"]["Core t (s)"] == 111.1
+
 
 def test_averages_only(tmp_path):
     # Log with only averages block
@@ -67,15 +73,19 @@ def test_averages_only(tmp_path):
     assert av["total-steps"] == 10
     assert av["Box-X"] == 1.0
 
+
 def test_cli_entrypoint(tmp_path, log_path, monkeypatch):
     # Test the CLI main() function
     output_file = tmp_path / "out.json"
-    monkeypatch.setattr("sys.argv", ["gromacslog.py", log_path, "--output", str(output_file)])
+    monkeypatch.setattr(
+        "sys.argv", ["gromacslog.py", log_path, "--output", str(output_file)]
+    )
     main()
     assert output_file.exists()
     with open(output_file) as f:
         data = json.load(f)
     assert "Summary" in data
+
 
 def test_parse_twice(log_path):
     # Ensure repeated parsing is consistent
@@ -83,6 +93,7 @@ def test_parse_twice(log_path):
     data1 = parser.parse()
     data2 = parser.parse()
     assert data1 == data2
+
 
 def test_parse_with_nonexistent_file(tmp_path):
     # Should raise FileNotFoundError

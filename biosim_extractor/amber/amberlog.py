@@ -6,10 +6,11 @@ This script parses AMBER log files and outputs structured metadata as JSON.
 It can be used as a standalone CLI tool or imported as a module.
 """
 
-import re
-import json
 import argparse
-from biosim_extractor.helpers.log_utils import parse_value, add_value, normalize_name
+import json
+import re
+
+from biosim_extractor.helpers.log_utils import add_value, normalize_name, parse_value
 
 
 # -------------------------
@@ -19,6 +20,7 @@ class AmberLogParser:
     """
     Parser for AMBER log files.
     """
+
     def __init__(self, filepath):
         """
         Args:
@@ -182,7 +184,9 @@ class AmberLogParser:
         Parse results blocks from the log file.
         """
         # self._parse_time_series()
-        self._parse_block("A V E R A G E S", "R M S  F L U C T U A T I O N S", "Averages")
+        self._parse_block(
+            "A V E R A G E S", "R M S  F L U C T U A T I O N S", "Averages"
+        )
         # self._parse_block("R M S  F L U C T U A T I O N S", "TIMINGS", "RMSFluctuations")
         self._parse_timings()
 
@@ -268,9 +272,11 @@ class AmberLogParser:
                     val = parse_value(match.group(2))
                     add_value(timings, key, val)
 
+
 # =========================
 # ENTRY POINT
 # =========================
+
 
 def parse_args():
     """Parse command-line arguments.
@@ -278,7 +284,9 @@ def parse_args():
     Returns:
         Parsed ``argparse.Namespace`` object.
     """
-    parser = argparse.ArgumentParser(description="Extract Amber log file metadata to JSON")
+    parser = argparse.ArgumentParser(
+        description="Extract Amber log file metadata to JSON"
+    )
     parser.add_argument("logfile", help="Path to Amber log file")
     parser.add_argument("--output", "-o", help="Output file path (default: stdout)")
     return parser.parse_args()

@@ -7,29 +7,29 @@ as published by the Free Software Foundation; either version 2.1
 of the License, or (at your option) any later version.
 
                          Current GROMACS contributors:
-       Mark Abraham           Andrey Alekseenko           Cathrine Bergh      
-      Christian Blau            Eliane Briand               Kevin Boyd        
-     Oliver Fleetwood         Stefan Fleischmann           Vytas Gapsys       
-       Gaurav Garg           Gilles Gouaillardet            Alan Gray         
-      Victor Holanda           M. Eric Irrgang              Joe Jordan        
-    Christoph Junghans        Prashanth Kanduri           Sebastian Kehl      
-     Sebastian Keller          Carsten Kutzner           Magnus Lundborg      
-       Pascal Merz              Dmitry Morozov             Szilard Pall       
-      Roland Schulz             Michael Shirts         David van der Spoel    
-     Alessandra Villa      Sebastian Wingbermuehle        Artem Zhmurov       
+       Mark Abraham           Andrey Alekseenko           Cathrine Bergh
+      Christian Blau            Eliane Briand               Kevin Boyd
+     Oliver Fleetwood         Stefan Fleischmann           Vytas Gapsys
+       Gaurav Garg           Gilles Gouaillardet            Alan Gray
+      Victor Holanda           M. Eric Irrgang              Joe Jordan
+    Christoph Junghans        Prashanth Kanduri           Sebastian Kehl
+     Sebastian Keller          Carsten Kutzner           Magnus Lundborg
+       Pascal Merz              Dmitry Morozov             Szilard Pall
+      Roland Schulz             Michael Shirts         David van der Spoel
+     Alessandra Villa      Sebastian Wingbermuehle        Artem Zhmurov
 
                          Previous GROMACS contributors:
-        Emile Apol             Rossen Apostolov           James Barnett       
-  Herman J.C. Berendsen          Par Bjelkmar           Viacheslav Bolnykh    
-    Aldert van Buuren          Carlo Camilloni           Rudi van Drunen      
-      Anton Feenstra           Gerrit Groenhof            Bert de Groot       
-      Anca Hamuraru           Vincent Hindriksen         Aleksei Iupinov      
-   Dimitrios Karkoulis           Peter Kasson               Jiri Kraus        
-       Per Larsson             Justin A. Lemkul           Viveca Lindahl      
-      Erik Marklund           Pieter Meulenhoff           Vedran Miletic      
-      Teemu Murtola              Sander Pronk            Alexey Shvetsov      
-      Alfons Sijbers            Peter Tieleman             Jon Vincent        
-     Teemu Virolainen         Christian Wennberg           Maarten Wolf       
+        Emile Apol             Rossen Apostolov           James Barnett
+  Herman J.C. Berendsen          Par Bjelkmar           Viacheslav Bolnykh
+    Aldert van Buuren          Carlo Camilloni           Rudi van Drunen
+      Anton Feenstra           Gerrit Groenhof            Bert de Groot
+      Anca Hamuraru           Vincent Hindriksen         Aleksei Iupinov
+   Dimitrios Karkoulis           Peter Kasson               Jiri Kraus
+       Per Larsson             Justin A. Lemkul           Viveca Lindahl
+      Erik Marklund           Pieter Meulenhoff           Vedran Miletic
+      Teemu Murtola              Sander Pronk            Alexey Shvetsov
+      Alfons Sijbers            Peter Tieleman             Jon Vincent
+     Teemu Virolainen         Christian Wennberg           Maarten Wolf
 
                   Coordinated by the GROMACS project leaders:
                     Paul Bauer, Berk Hess, and Erik Lindahl
@@ -300,13 +300,13 @@ qm-opts:
        normalize-densities        = true
        adaptive-force-scaling     = false
        adaptive-force-scaling-time-constant = 4
-       shift-vector               = 
-       transformation-matrix      = 
+       shift-vector               =
+       transformation-matrix      =
      qmmm-cp2k:
        active                     = false
        qmgroup                    = System
        qmmethod                   = PBE
-       qmfilenames                = 
+       qmfilenames                =
        qmcharge                   = 0
        qmmultiplicity             = 1
 grpopts:
@@ -344,14 +344,14 @@ The maximum allowed distance for atom groups involved in interactions is:
           multi-body bonded interactions  (-rdd)   1.168 nm
 
 Using 1 MPI thread
-Using 16 OpenMP threads 
+Using 16 OpenMP threads
 
 Pinning threads with an auto-selected logical cpu stride of 1
 System total charge: -0.000
 Will do PME sum in reciprocal space for electrostatic interactions.
 
 ++++ PLEASE READ AND CITE THE FOLLOWING REFERENCE ++++
-U. Essmann, L. Perera, M. L. Berkowitz, T. Darden, H. Lee and L. G. Pedersen 
+U. Essmann, L. Perera, M. L. Berkowitz, T. Darden, H. Lee and L. G. Pedersen
 A smooth particle mesh Ewald method
 J. Chem. Phys. 103 (1995) pp. 8577-8592
 -------- -------- --- Thank You --- -------- --------
@@ -6868,4 +6868,3 @@ Norm of force     =  2.3638620e+01
  av. #atoms communicated per step for force:  2 x 0.0
 
 Finished mdrun on rank 0 Sat Jul  1 19:05:21 2023
-

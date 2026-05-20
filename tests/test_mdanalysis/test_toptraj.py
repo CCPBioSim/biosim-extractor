@@ -1,9 +1,11 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 import biosim_extractor.mdanalysis.toptraj as toptraj
 
 # --- Helpers ---
+
 
 def make_mock_atoms(length, names=None):
     atoms = MagicMock()
@@ -15,6 +17,7 @@ def make_mock_atoms(length, names=None):
         atoms.names = names
     return atoms
 
+
 def make_mock_residues(length, resnames=None):
     residues = MagicMock()
     residues.__len__.return_value = length
@@ -22,69 +25,97 @@ def make_mock_residues(length, resnames=None):
         residues.resnames = resnames
     return residues
 
+
 # --- Tests ---
 
-@pytest.mark.parametrize("dims, expected", [
-    ([10, 10, 10, 90, 90, 90], "cubic"),
-    ([10, 10, 20, 90, 90, 90], "tetragonal"),
-    ([10, 20, 30, 90, 90, 90], "orthorhombic"),
-    ([10, 10, 10, 90, 120, 120], "truncated octahedron"),
-    ([10, 10, 10, 80, 100, 110], "triclinic"),
-])
+
+@pytest.mark.parametrize(
+    "dims, expected",
+    [
+        ([10, 10, 10, 90, 90, 90], "cubic"),
+        ([10, 10, 20, 90, 90, 90], "tetragonal"),
+        ([10, 20, 30, 90, 90, 90], "orthorhombic"),
+        ([10, 10, 10, 90, 120, 120], "truncated octahedron"),
+        ([10, 10, 10, 80, 100, 110], "triclinic"),
+    ],
+)
 def test_classify_box_variants(dims, expected):
     assert toptraj.classify_box(dims) == expected
+
 
 def test_safe_extract_numpy_scalar():
     class Dummy:
         def __call__(self):
             class N:
-                def item(self): return 42.0
+                def item(self):
+                    return 42.0
+
             return N()
+
     assert toptraj.safe_extract(Dummy()) == 42.0
+
 
 def test_safe_extract_numpy_array():
     class Dummy:
         def __call__(self):
             class N:
-                def tolist(self): return [1.0, 2.0]
+                def tolist(self):
+                    return [1.0, 2.0]
+
             return N()
+
     assert toptraj.safe_extract(Dummy()) == [1.0, 2.0]
+
 
 def test_safe_extract_list_of_numpy():
     class Dummy:
         def __call__(self):
             class N:
-                def item(self): return 1.0
-                def __float__(self): return 1.0
+                def item(self):
+                    return 1.0
+
+                def __float__(self):
+                    return 1.0
+
             return [N(), N()]
+
     assert toptraj.safe_extract(Dummy()) == [1.0, 1.0]
+
 
 def test_safe_extract_handles_non_numpy():
     class Dummy:
         def __call__(self):
             return 123
+
     assert toptraj.safe_extract(Dummy()) == 123
+
 
 def test_get_protein_sequence_handles_no_protein():
     fragment = MagicMock()
     fragment.select_atoms.return_value = []
     assert toptraj.get_protein_sequence(fragment) is None
 
+
 def test_get_nucleic_sequence_handles_no_nucleic():
     fragment = MagicMock()
     fragment.select_atoms.return_value = []
     assert toptraj.get_nucleic_sequence(fragment) is None
 
+
 def test_get_protein_sequence_with_alternative_names():
     fragment = MagicMock()
     protein_atoms = MagicMock()
     residues_mock = MagicMock()
-    residues_mock.__iter__.return_value = [MagicMock(resname='ALAD'), MagicMock(resname='ASH')]
+    residues_mock.__iter__.return_value = [
+        MagicMock(resname="ALAD"),
+        MagicMock(resname="ASH"),
+    ]
     residues_mock.sequence.return_value.seq = "AA"
     protein_atoms.residues = residues_mock
     fragment.select_atoms.return_value = protein_atoms
     protein_atoms.__len__.return_value = 2
     assert toptraj.get_protein_sequence(fragment) == "AA"
+
 
 def test_get_nucleic_sequence_with_dna():
     fragment = MagicMock()
@@ -94,6 +125,7 @@ def test_get_nucleic_sequence_with_dna():
     fragment.select_atoms.return_value = dna_atoms
     dna_atoms.__len__.return_value = 3
     assert toptraj.get_nucleic_sequence(fragment) == "ATG"
+
 
 @patch("biosim_extractor.mdanalysis.toptraj.Chem")
 def test_rdkit_auto_extract_and_sequence_auto_extract(mock_chem):
@@ -111,21 +143,29 @@ def test_rdkit_auto_extract_and_sequence_auto_extract(mock_chem):
     assert toptraj.RDKIT_AUTO_EXTRACT["molecular_weight"](rdkit_mol) == 18.0
 
     fragment = MagicMock()
-    with patch("biosim_extractor.mdanalysis.toptraj.get_protein_sequence", return_value="ABC"):
+    with patch(
+        "biosim_extractor.mdanalysis.toptraj.get_protein_sequence", return_value="ABC"
+    ):
         assert toptraj.SEQUENCE_AUTO_EXTRACT["protein_sequence"](fragment) == "ABC"
-    with patch("biosim_extractor.mdanalysis.toptraj.get_nucleic_sequence", return_value="ATG"):
+    with patch(
+        "biosim_extractor.mdanalysis.toptraj.get_nucleic_sequence", return_value="ATG"
+    ):
         assert toptraj.SEQUENCE_AUTO_EXTRACT["nucleic_sequence"](fragment) == "ATG"
+
 
 @patch("biosim_extractor.mdanalysis.toptraj.Universe")
 def test_toptrajparser_parse_and_extract_molecules(mock_universe):
     import numpy as np
+
     mock_u = MagicMock()
     mock_u.atoms.n_atoms = 100
     mock_u.atoms.charges = [1.0] * 100
     mock_u.atoms.fragments = [MagicMock(), MagicMock()]
     mock_trajectory = MagicMock()
     mock_trajectory.__len__.return_value = 1
-    mock_trajectory.__getitem__.return_value = MagicMock(dimensions=np.array([10, 10, 10, 90, 90, 90]))
+    mock_trajectory.__getitem__.return_value = MagicMock(
+        dimensions=np.array([10, 10, 10, 90, 90, 90])
+    )
     mock_u.trajectory = mock_trajectory
     mock_u.select_atoms.return_value = [1, 2, 3]
     mock_universe.return_value = mock_u
@@ -136,20 +176,25 @@ def test_toptrajparser_parse_and_extract_molecules(mock_universe):
     assert "total_atom_count" in result
     assert "molecule_ids" in result
 
+
 def test_molid_auto_extract():
     fragment = MagicMock()
     fragment.atoms = make_mock_atoms(5)
     fragment.residues = [1, 2]
     fragment.atoms.charges = [1.0, -1.0, 0.0, 0.0, 0.0]
     fragment.masses = [12.0, 1.0, 1.0, 16.0, 14.0]
-    assert toptraj.MOLID_AUTO_EXTRACT['atom_count'](fragment) == 5
-    assert toptraj.MOLID_AUTO_EXTRACT['monomer_count'](fragment) == 2
-    assert toptraj.MOLID_AUTO_EXTRACT['molecule_charge'](fragment) == 0.0
-    assert toptraj.MOLID_AUTO_EXTRACT['molecular_weight'](fragment) == pytest.approx(44.0)
+    assert toptraj.MOLID_AUTO_EXTRACT["atom_count"](fragment) == 5
+    assert toptraj.MOLID_AUTO_EXTRACT["monomer_count"](fragment) == 2
+    assert toptraj.MOLID_AUTO_EXTRACT["molecule_charge"](fragment) == 0.0
+    assert toptraj.MOLID_AUTO_EXTRACT["molecular_weight"](fragment) == pytest.approx(
+        44.0
+    )
+
 
 @patch("biosim_extractor.mdanalysis.toptraj.Universe")
 def test_toptrajparser_find_molecule_ids_peptide_and_atom(mock_universe):
     import numpy as np
+
     mock_u = MagicMock()
     mock_u.atoms.n_atoms = 2
     mock_u.atoms.charges = [1.0, -1.0]
@@ -167,7 +212,9 @@ def test_toptrajparser_find_molecule_ids_peptide_and_atom(mock_universe):
     mock_u.atoms.fragments = [atom_fragment, peptide_fragment]
     mock_trajectory = MagicMock()
     mock_trajectory.__len__.return_value = 1
-    mock_trajectory.__getitem__.return_value = MagicMock(dimensions=np.array([10, 10, 10, 90, 90, 90]))
+    mock_trajectory.__getitem__.return_value = MagicMock(
+        dimensions=np.array([10, 10, 10, 90, 90, 90])
+    )
     mock_u.trajectory = mock_trajectory
     mock_u.select_atoms.return_value = [1, 2]
     mock_universe.return_value = mock_u
@@ -177,8 +224,10 @@ def test_toptrajparser_find_molecule_ids_peptide_and_atom(mock_universe):
     assert "molecule_ids" in result
     assert result["unique_molecule_count"] == 2
 
+
 def test_cli_entry_point(monkeypatch):
     import sys
+
     args = ["prog", "top", "traj"]
     monkeypatch.setattr(sys, "argv", args)
     with patch("biosim_extractor.mdanalysis.toptraj.TopTrajParser") as mock_parser:

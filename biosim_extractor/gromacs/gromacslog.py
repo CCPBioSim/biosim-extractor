@@ -2,14 +2,17 @@
 """
 Extract gmx log file metadata into a dictionary.
 """
-import re
-import json
+
 import argparse
+import json
+import re
+
 from biosim_extractor.helpers.log_utils import parse_value
 
 
 class GromacsLogParser:
     """Parser for GROMACS ``.log`` files, extracting header, input parameters, summary, and averages."""
+
     def __init__(self, filepath):
         """
         Args:
@@ -49,13 +52,28 @@ class GromacsLogParser:
     def _parse_header(self):
         """Extract top-level key-value fields from the file header (e.g. GROMACS version, compiler)."""
         keys = [
-            "Executable", "Data prefix", "Working dir", "Process ID",
-            "Command line", "GROMACS version", "Precision", "Memory model",
-            "MPI library", "OpenMP support", "GPU support",
-            "SIMD instructions", "CPU FFT library", "GPU FFT library",
-            "RDTSCP usage", "TNG support", "Hwloc support",
-            "Tracing support", "C compiler", "C compiler flags",
-            "C++ compiler", "C++ compiler flags",
+            "Executable",
+            "Data prefix",
+            "Working dir",
+            "Process ID",
+            "Command line",
+            "GROMACS version",
+            "Precision",
+            "Memory model",
+            "MPI library",
+            "OpenMP support",
+            "GPU support",
+            "SIMD instructions",
+            "CPU FFT library",
+            "GPU FFT library",
+            "RDTSCP usage",
+            "TNG support",
+            "Hwloc support",
+            "Tracing support",
+            "C compiler",
+            "C compiler flags",
+            "C++ compiler",
+            "C++ compiler flags",
         ]
         for line in self.lines:
             for key in keys:
@@ -106,8 +124,6 @@ class GromacsLogParser:
                     array = [arr for arr in v.values()]
                     sub_dict.pop(k)
                     sub_dict[new_k] = array
-                
-
 
     # =========================
     # SUMMARY (PERFORMANCE, TIME)
@@ -149,7 +165,10 @@ class GromacsLogParser:
             line = lines[i]
             if re.match(r"\s*Step\s+Time", line):
                 step_line = lines[i + 1].split()
-                entry = {"Step": parse_value(step_line[0]), "Time": parse_value(step_line[1])}
+                entry = {
+                    "Step": parse_value(step_line[0]),
+                    "Time": parse_value(step_line[1]),
+                }
 
                 # locate "Energies" block
                 j = i + 2
@@ -211,9 +230,12 @@ class GromacsLogParser:
                     for block in range(4):
                         headers = lines[i + 1 + block * 2]
                         values = lines[i + 2 + block * 2].split()
-                        headers_split = [(headers[i:i+15].split()) for i in range(0, len(headers), 15)]
+                        headers_split = [
+                            (headers[i : i + 15].split())
+                            for i in range(0, len(headers), 15)
+                        ]
                         for h, v in zip(headers_split[:-1], values):
-                            h = (" ".join(h))
+                            h = " ".join(h)
                             averages[h] = parse_value(v)
                     i += 8
                     continue
@@ -251,9 +273,11 @@ class GromacsLogParser:
 
         self.data["Averages"] = averages
 
+
 # =========================
 # ENTRY POINT
 # =========================
+
 
 def parse_args():
     """Parse command-line arguments.
@@ -261,7 +285,9 @@ def parse_args():
     Returns:
         Parsed ``argparse.Namespace`` object.
     """
-    parser = argparse.ArgumentParser(description="Extract GROMACS log file metadata to JSON")
+    parser = argparse.ArgumentParser(
+        description="Extract GROMACS log file metadata to JSON"
+    )
     parser.add_argument("logfile", help="Path to GROMACS log file")
     parser.add_argument("--output", "-o", help="Output file path (default: stdout)")
     return parser.parse_args()
