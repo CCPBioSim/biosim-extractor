@@ -151,6 +151,29 @@ def normalize_key(value: Any) -> str:
     return str(value).strip().lower()
 
 
+def round_floats(obj, decimals=3):
+    """
+    Recursively round all floats in a nested structure (dict, list, tuple) to the given decimals.
+
+    Args:
+        obj: The object to process (dict, list, tuple, float, etc.).
+        decimals: Number of decimal places to round to.
+
+    Returns:
+        The processed object with all floats rounded.
+    """
+    if isinstance(obj, float):
+        return round(obj, decimals)
+    elif isinstance(obj, list):
+        return [round_floats(item, decimals) for item in obj]
+    elif isinstance(obj, tuple):
+        return tuple(round_floats(item, decimals) for item in obj)
+    elif isinstance(obj, dict):
+        return {k: round_floats(v, decimals) for k, v in obj.items()}
+    else:
+        return obj
+
+
 def transform_value(value: Any, rules: Dict):
     """Map a raw engine value to its canonical schema equivalent using a rules dict.
 
@@ -247,6 +270,8 @@ class MetadataPopulator:
 
         # Remove any dict that contains a None field
         result = remove_null_parents(result) or {}
+        # Round all floats
+        result = round_floats(result, decimals=2)
 
         return result
 

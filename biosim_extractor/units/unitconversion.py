@@ -130,6 +130,7 @@ class UnitConverter:
         value: Union[float, List[float]],
         from_unit: str,
         unit_type: Optional[str] = None,
+        decimals: Optional[int] = None,
     ) -> Union[float, List[float]]:
         """
         Convert a value from one unit to the standard unit.
@@ -154,7 +155,7 @@ class UnitConverter:
         target_unit = self.standards[unit_type]
         # Skip conversion if already in standard unit
         if from_unit == target_unit:
-            return value
+            result = value
 
         if unit_type not in self.factors:
             raise ValueError(f"Unknown unit type: {unit_type}")
@@ -165,12 +166,20 @@ class UnitConverter:
 
         # Handle temperature conversions (functions instead of factors)
         if callable(factor):
-            return factor(value)
+            result = factor(value)
         # handle lists
         if isinstance(value, list):
-            return [x * factor for x in value]
+            result = [x * factor for x in value]
         else:
-            return value * factor
+            result = value * factor
+
+        # Apply rounding if requested
+        if decimals is not None:
+            if isinstance(result, list):
+                result = [round(float(x), decimals) for x in result]
+            else:
+                result = round(float(result), decimals)
+        return result
 
     def convert_with_unit(
         self,
