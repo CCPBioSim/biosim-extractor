@@ -16,6 +16,11 @@ API Reference
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: biosim_extractor.metadata.convertpopulated
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. automodule:: biosim_extractor.mdanalysis.toptraj
    :members:
    :undoc-members:

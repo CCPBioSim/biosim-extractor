@@ -10,6 +10,7 @@ from typing import Any, Dict
 
 from biosim_extractor.amber.amberlog import AmberLogParser
 from biosim_extractor.gromacs.gromacslog import GromacsLogParser
+from biosim_extractor.helpers.metadata_utils import round_floats
 from biosim_extractor.mdanalysis.toptraj import TopTrajParser
 from biosim_extractor.metadata.validatemetadata import validate_metadata
 from biosim_extractor.units.unitconversion import UnitConverter
@@ -149,29 +150,6 @@ def normalize_key(value: Any) -> str:
         Lowercased, stripped string representation.
     """
     return str(value).strip().lower()
-
-
-def round_floats(obj, decimals=3):
-    """
-    Recursively round all floats in a nested structure (dict, list, tuple) to the given decimals.
-
-    Args:
-        obj: The object to process (dict, list, tuple, float, etc.).
-        decimals: Number of decimal places to round to.
-
-    Returns:
-        The processed object with all floats rounded.
-    """
-    if isinstance(obj, float):
-        return round(obj, decimals)
-    elif isinstance(obj, list):
-        return [round_floats(item, decimals) for item in obj]
-    elif isinstance(obj, tuple):
-        return tuple(round_floats(item, decimals) for item in obj)
-    elif isinstance(obj, dict):
-        return {k: round_floats(v, decimals) for k, v in obj.items()}
-    else:
-        return obj
 
 
 def transform_value(value: Any, rules: Dict):
