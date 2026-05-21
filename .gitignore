@@ -206,5 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# scripts
+# scripts and outputs
 run_commands.sh
+file.log
