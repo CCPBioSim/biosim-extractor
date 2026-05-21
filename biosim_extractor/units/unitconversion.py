@@ -77,7 +77,9 @@ class UnitConverter:
             "temperature": {
                 "K": 1.0,
                 "C": lambda x: x + 273.15,
+                "°C": lambda x: x + 273.15,
                 "F": lambda x: (x - 32) * 5 / 9 + 273.15,
+                "°F": lambda x: (x - 32) * 5 / 9 + 273.15,
             },
             "pressure": {
                 "bar": 1.0,
@@ -166,12 +168,15 @@ class UnitConverter:
 
         # Handle temperature conversions (functions instead of factors)
         if callable(factor):
-            result = factor(value)
-        # handle lists
-        if isinstance(value, list):
-            result = [x * factor for x in value]
+            if isinstance(value, list):
+                result = [factor(x) for x in value]
+            else:
+                result = factor(value)
         else:
-            result = value * factor
+            if isinstance(value, list):
+                result = [x * factor for x in value]
+            else:
+                result = value * factor
 
         # Apply rounding if requested
         if decimals is not None:
