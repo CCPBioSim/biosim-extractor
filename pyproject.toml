@@ -37,7 +37,7 @@ dependencies = [
     "MDAnalysis==2.10.0",
     "biopython==1.87",
     "rdkit>=2025.9.5",
-    "linkml==1.10.0",
+    "linkml==1.11.1",
 ]
 
 [project.urls]
