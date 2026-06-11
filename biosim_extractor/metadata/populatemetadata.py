@@ -330,7 +330,18 @@ class MetadataPopulator:
 
             raw_value = engine_data[param]
             for path, rules in config.get("by_path", {}).items():
+                is_multivalued = (
+                    config.get("path_metadata", {})
+                    .get(path, {})
+                    .get("multivalued", False)
+                )
                 mapped_value = transform_value(raw_value, rules)
+                if (
+                    is_multivalued
+                    and mapped_value is not None
+                    and not isinstance(mapped_value, list)
+                ):
+                    mapped_value = [mapped_value]
 
                 if len(rules) == 0:  # check for unit conversion
                     for term in forward_mapping[path]:
@@ -396,7 +407,20 @@ class MetadataPopulator:
                     if prop_name in reverse_mapping:
                         config = reverse_mapping[prop_name]
                         for path, rules in config.get("by_path", {}).items():
+                            is_multivalued = (
+                                config.get("path_metadata", {})
+                                .get(path, {})
+                                .get("multivalued", False)
+                            )
                             mapped_value = transform_value(prop_value, rules)
+
+                            # check if multivalued
+                            if (
+                                is_multivalued
+                                and mapped_value is not None
+                                and not isinstance(mapped_value, list)
+                            ):
+                                mapped_value = [mapped_value]
 
                             # Check for unit conversion
                             if len(rules) == 0:
