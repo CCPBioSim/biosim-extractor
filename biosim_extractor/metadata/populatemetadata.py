@@ -12,6 +12,7 @@ from biosim_extractor.amber.amberlog import AmberLogParser
 from biosim_extractor.gromacs.gromacslog import GromacsLogParser
 from biosim_extractor.helpers.metadata_utils import round_floats
 from biosim_extractor.mdanalysis.toptraj import TopTrajParser
+from biosim_extractor.metadata.fetchschema import get_schema, update_schema
 from biosim_extractor.metadata.validatemetadata import validate_metadata
 from biosim_extractor.units.unitconversion import UnitConverter
 
@@ -464,6 +465,30 @@ class MetadataPopulator:
                 return {"value": value, "value_unit": unit}
 
 
+def resolve_schema_inputs(args):
+    """Resolve mapping and biosim schema paths from args or remote schema bundle."""
+    mapping_path = args.mappingschema
+    biosim_path = args.biosimschema
+
+    # If either path is missing, fetch a schema bundle and fill defaults.
+    if not mapping_path or not biosim_path:
+        bundle = (
+            update_schema(
+                version=args.schema_version,
+                cache_dir=args.schema_cache_dir,
+            )
+            if args.update_schema
+            else get_schema(
+                version=args.schema_version,
+                cache_dir=args.schema_cache_dir,
+            )
+        )
+        mapping_path = mapping_path or str(bundle.mapping_json)
+        biosim_path = biosim_path or str(bundle.schema_yaml)
+
+    return mapping_path, biosim_path
+
+
 # -----------------------------
 # Entry point
 # -----------------------------
@@ -479,11 +504,32 @@ def parse_args():
         description="Populate biosim-schema with MD engine data"
     )
 
-    # Required arguments
-    parser.add_argument("schema", help="Path to extraction schema JSON file")
+    parser.add_argument(
+        "mappingschema",
+        nargs="?",
+        help="Path to engine mapping schema JSON (optional if schema bundle is fetched).",
+    )
 
-    # Optional file arguments
-    parser.add_argument("--biosimschema", help="Path to biosim schema yaml")
+    parser.add_argument(
+        "--biosimschema",
+        help="Path to biosim schema YAML (optional if schema bundle is fetched).",
+    )
+    parser.add_argument(
+        "--schema-version",
+        default="latest",
+        help="biosim-schema release version/tag to fetch (default: latest).",
+    )
+    parser.add_argument(
+        "--schema-cache-dir",
+        default=None,
+        help="Directory for cached biosim-schema bundles (default: BIOSIM_SCHEMA_CACHE_DIR or /tmp/biosim-schema-cache).",
+    )
+    parser.add_argument(
+        "--update-schema",
+        action="store_true",
+        help="Force refresh of cached schema bundle before use.",
+    )
+
     parser.add_argument("--engine", help="MD engine (amber, gromacs, etc.)")
     parser.add_argument("--logfile", help="Path to MD log file")
     parser.add_argument("--top", help="Topology file path")
@@ -495,11 +541,13 @@ def parse_args():
 
 
 def main():
-    """Entry point: parse args, run population pipeline, validate, and write output."""
+    """Entry point: parse args, resolve schema sources, run pipeline, validate, write output."""
     args = parse_args()
 
+    mapping_path, biosim_path = resolve_schema_inputs(args)
+
     populator = MetadataPopulator(
-        schema_path=args.schema,
+        schema_path=mapping_path,
         log_file=args.logfile,
         engine=args.engine,
         top_file=args.top,
@@ -507,7 +555,7 @@ def main():
     )
 
     result = populator.populate()
-    populator.validate(result, biosimschema_path=args.biosimschema)
+    populator.validate(result, biosimschema_path=biosim_path)
 
     if args.output:
         with open(args.output, "w") as f:

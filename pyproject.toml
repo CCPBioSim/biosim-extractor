@@ -75,6 +75,7 @@ populatemetadata = "biosim_extractor.metadata.populatemetadata:main"
 extract-toptraj = "biosim_extractor.mdanalysis.toptraj:main"  # Uncomment and modify if you add CLI scripts
 extract-amberlog = "biosim_extractor.amber.amberlog:main"  # Uncomment and modify if you add CLI scripts
 extract-gromacslog = "biosim_extractor.gromacs.gromacslog:main"
+fetchschema = "biosim_extractor.metadata.fetchschema:main"
 
 #
 # Ruff configuration inside pyproject (recommended)
