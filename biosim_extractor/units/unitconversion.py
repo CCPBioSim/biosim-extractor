@@ -24,7 +24,7 @@ class UnitConverter:
         """
         self.standards: Dict[str, str] = standard_units or {
             "length": "nm",  # nanometers
-            "volume": "nm^3",  # nanometers cubed
+            "volume": "nm³",  # nanometers cubed
             "time": "ps",  # picoseconds
             "energy": "kJ/mol",  # kilojoules per mole
             "temperature": "K",  # Kelvin
@@ -34,7 +34,7 @@ class UnitConverter:
             "velocity": "nm/ps",  # nanometers per picosecond
             "frequency": "1/ps",  # inverse picoseconds
             "friction": "a/ps",  # atomic mass units per picosecond
-            "angle": "degrees",  # degrees
+            "angle": "degree",  # degree
             "charge": "e",  # atomic charge units
             "molecular_weight": "g/mol",  # grams per mol
         }
@@ -51,6 +51,7 @@ class UnitConverter:
                 "m": 1e9,
             },
             "volume": {
+                "nm³": 1,
                 "nm^3": 1,
                 "A^3": 1000,
                 "Å^3": 1000,
