@@ -8,7 +8,7 @@
 
 project = 'biosim-extractor'
 copyright = '2026, CCPBioSim'
-release = '0.0.4'
+release = '0.0.5'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
