@@ -51,7 +51,7 @@ jobs:
       - name: Change version in repo and CITATION.cff
         run: |
           # Update Python package version
-          sed -i "s/__version__ =.*/__version__ = \"${{ github.event.inputs.version }}\"/g" biosim-extractor/biosim_extractor/__init__.py
+          sed -i "s/__version__ =.*/__version__ = \"${{ github.event.inputs.version }}\"/g" biosim_extractor/__init__.py
 
           # Keep Sphinx release metadata in sync
           sed -i -E "s/^(release = ).*/\1'${{ github.event.inputs.version }}'/" docs/source/conf.py
