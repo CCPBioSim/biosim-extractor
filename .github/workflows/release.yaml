@@ -53,6 +53,9 @@ jobs:
           # Update Python package version
           sed -i "s/__version__ =.*/__version__ = \"${{ github.event.inputs.version }}\"/g" biosim-exractor/biosim_extractor/__init__.py
 
+          # Keep Sphinx release metadata in sync
+          sed -i -E "s/^(release = ).*/\1'${{ github.event.inputs.version }}'/" docs/source/conf.py
+
           # Update CITATION.cff version and date-released
           if [ -f CITATION.cff ]; then
             sed -i -E "s/^(version:\s*).*/\1${{ github.event.inputs.version }}/" CITATION.cff
