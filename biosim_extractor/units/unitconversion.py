@@ -109,7 +109,7 @@ class UnitConverter:
                 "amu/ps": 1.0,
             },
             "angle": {
-                "degrees": 1.0,
+                "degree": 1.0,
             },
             "charge": {
                 "e": 1.0,
