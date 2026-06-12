@@ -1,0 +1,59 @@
+{% set name = "biosim-extractor" %}
+{% set version = "0.0.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  path: ..
+
+build:
+  noarch: python
+  script: |
+    python -m pip install . -vv --no-deps
+  entry_points:
+    - populatemetadata=biosim_extractor.metadata.populatemetadata:main
+    - extract-toptraj=biosim_extractor.mdanalysis.toptraj:main
+    - extract-amberlog=biosim_extractor.amber.amberlog:main
+    - extract-gromacslog=biosim_extractor.gromacs.gromacslog:main
+    - fetchschema=biosim_extractor.metadata.fetchschema:main
+
+requirements:
+  host:
+    - python >=3.12
+    - pip
+    - flit-core >=3.4,<4
+  run:
+    - python >=3.12
+    - mdanalysis >=2.10.0,<3.0
+    - biopython >=1.87,<2
+    - rdkit >=2025.9.5,<2026
+    - linkml >=1.11.1,<2.0
+
+test:
+  imports:
+    - biosim_extractor
+    - biosim_extractor.amber
+    - biosim_extractor.gromacs
+    - biosim_extractor.metadata
+    - biosim_extractor.mdanalysis
+    - biosim_extractor.units
+  commands:
+    - populatemetadata --help
+    - extract-amberlog --help
+    - extract-gromacslog --help
+    - extract-toptraj --help
+    - fetchschema --help
+
+about:
+  home: https://github.com/CCPBioSim/biosim-extractor
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  license_url: https://github.com/CCPBioSim/biosim-extractor/blob/main/LICENSE
+  summary: Python package for extracting and standardizing metadata from molecular dynamics simulation outputs.
+  description: "BioSim Extractor parses molecular dynamics simulation outputs, including engine log files, topology files, and trajectory files, and maps the extracted metadata into the BioSim schema. It supports standardized metadata generation for BioSimDR workflows, including unit conversion and schema validation."
+  dev_url: https://github.com/CCPBioSim/biosim-extractor
+  doc_url: https://biosim-extractor.readthedocs.io/en/latest/
+  doc_source_url: https://github.com/CCPBioSim/biosim-extractor/blob/main/README.md

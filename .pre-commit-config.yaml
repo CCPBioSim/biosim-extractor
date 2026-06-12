@@ -12,8 +12,18 @@ repos:
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: check-yaml
+        exclude: ^conda-recipe/meta\.yaml$
       - id: check-toml
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-case-conflict
       - id: check-ast
+
+  - repo: local
+    hooks:
+      - id: sphinx-docs
+        name: sphinx-build (pre-push, warnings as errors)
+        entry: bash -lc 'make -C docs clean && make -C docs html SPHINXOPTS="-W --keep-going"'
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
