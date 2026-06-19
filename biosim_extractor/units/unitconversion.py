@@ -25,7 +25,7 @@ class UnitConverter:
         self.standards: Dict[str, str] = standard_units or {
             "length": "nm",  # nanometers
             "volume": "nm³",  # nanometers cubed
-            "time": "ps",  # picoseconds
+            "time": "s",  # seconds
             "energy": "kJ/mol",  # kilojoules per mole
             "temperature": "K",  # Kelvin
             "pressure": "bar",  # bar
@@ -37,6 +37,7 @@ class UnitConverter:
             "angle": "degree",  # degree
             "charge": "e",  # atomic charge units
             "molecular_weight": "g/mol",  # grams per mol
+            "information_storage": "GB",  # gigabytes
         }
 
         # Conversion factors to standard units
@@ -59,10 +60,12 @@ class UnitConverter:
                 "Å³": 1000,
             },
             "time": {
-                "fs": 0.001,
-                "ps": 1.0,
-                "ns": 1000.0,
-                "s": 1e12,
+                "fs": 1e-15,
+                "ps": 1e-12,
+                "ns": 1e-9,
+                "μs": 1e-6,
+                "ms": 0.001,
+                "s": 1.0,
             },
             "energy": {
                 "kcal/mol": 4.184,
@@ -119,6 +122,10 @@ class UnitConverter:
                 "g/mol": 1.0,
                 "amu": 1.0,
                 "Da": 1.0,
+            },
+            "information_storage": {
+                "GB": 1.0,
+                "MB": 0.001,
             },
         }
 
