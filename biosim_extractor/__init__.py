@@ -5,4 +5,4 @@ A short description of your package.
 """
 
 __all__ = []  # Populate with public exports when needed
-__version__ = "0.0.6"
+__version__ = "0.0.7"
