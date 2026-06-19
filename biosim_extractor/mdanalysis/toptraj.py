@@ -317,7 +317,6 @@ class TopTrajParser:
                     continue
             else:
                 for field, func in SEQUENCE_AUTO_EXTRACT.items():
-                    print("***")
                     key = field
                     if callable(func):
                         result = func(fragment)
