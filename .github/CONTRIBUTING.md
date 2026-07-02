@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to **biosim-extractor**!
 
-We’re excited to collaborate with developers, researchers, and community members to make REPO-NAME better for everyone.
+We’re excited to collaborate with developers, researchers, and community members to make biosim-extractor better for everyone.
 
 This guide explains how to set up your environment, make changes, and submit them for review. Whether you’re fixing a bug, improving documentation, or adding new features, every contribution makes a difference.
 
@@ -11,7 +11,7 @@ This guide explains how to set up your environment, make changes, and submit the
 ## Getting Started
 
 Before contributing, please review the [Developer Guide]().
-It covers REPO-NAME’s architecture, setup instructions, and contribution workflow.
+It covers biosim-extractor’s architecture, setup instructions, and contribution workflow.
 
 If you’re new to the project, we also recommend:
 - Reading the [README](../README.md) for an overview and installation details.
@@ -52,7 +52,7 @@ Found a bug or have a feature request?
    - Expected vs. actual behavior
    - Relevant logs, screenshots, or input files
 
-Well-documented issues help us address problems faster and keep REPO-NAME stable and robust.
+Well-documented issues help us address problems faster and keep biosim-extractor stable and robust.
 
 ---
 
