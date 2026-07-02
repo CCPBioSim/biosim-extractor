@@ -12,10 +12,23 @@ from linkml.validator import validate
 
 
 def extract_schema_version(schema_path):
+    """Extract the biosim schema version from a local schema YAML file.
+
+    Args:
+    schema_path (str | Path): Path to the biosim schema YAML file.
+
+    Returns:
+    str | None: Parsed schema version string, or None if the path is missing,
+    points to a URL, the file does not exist, or no version field is found.
+    """
     if not schema_path or str(schema_path).startswith("http"):
         return None
 
-    text = Path(schema_path).read_text(encoding="utf-8")
+    p = Path(schema_path)
+    if not p.exists():
+        return None
+
+    text = p.read_text(encoding="utf-8")
     m = re.search(
         r"(?m)^version:\s*['\"]?([^\r\n'\"#]+)['\"]?\s*(?:#.*)?$",
         text,
