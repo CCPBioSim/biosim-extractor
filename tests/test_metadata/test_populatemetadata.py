@@ -1,4 +1,171 @@
+from types import SimpleNamespace
+
+import pytest
+
 from biosim_extractor.metadata import populatemetadata
+from biosim_extractor.metadata import populatemetadata as pop
+
+
+class _NoConvert:
+    def get_target_unit(self, u):
+        return u
+
+    def needs_conversion(self, u):
+        return False
+
+    def convert(self, v, u):
+        return v
+
+
+def test_parse_log_unsupported_engine_raises():
+    p = pop.MetadataPopulator(engine="unknown")
+    with pytest.raises(ValueError, match="Unsupported engine"):
+        p.parse_log()
+
+
+def test_populate_includes_file_metadata(monkeypatch):
+    p = pop.MetadataPopulator(
+        schema_path="ignored.json",
+        log_file="dummy.log",
+        engine="amber",
+        store_file_metadata=True,
+    )
+
+    monkeypatch.setattr(
+        p,
+        "load_schema",
+        lambda: setattr(
+            p, "schema", {"reverse": {"amber": {}}, "forward": {"amber": {}}}
+        ),
+    )
+    monkeypatch.setattr(p, "parse_log", lambda: {})
+    monkeypatch.setattr(p, "apply_mapping", lambda: {"SimulationMetadata": {}})
+    monkeypatch.setattr(
+        pop, "group_files", lambda files, saved, role="other": {"log": files}
+    )
+    monkeypatch.setattr(
+        pop, "files_metadata", lambda saved: [{"file_name": saved["log"][0]}]
+    )
+
+    result = p.populate()
+    assert result["files"][0]["file_name"] == "dummy.log"
+
+
+def test_populate_uses_toptraj_branch(monkeypatch):
+    p = pop.MetadataPopulator(
+        schema_path="ignored.json",
+        top_file="a.top",
+        traj_file=["a.xtc"],
+        store_file_metadata=False,
+    )
+    monkeypatch.setattr(p, "load_schema", lambda: None)
+    monkeypatch.setattr(
+        p, "populate_toptraj", lambda: {"SimulationMetadata": {"ok": 1}}
+    )
+
+    assert p.populate()["ok"] == 1
+
+
+def test_apply_mapping_promotes_scalar_to_vector_and_appends():
+    p = pop.MetadataPopulator(engine="amber")
+    p.converter = _NoConvert()
+    p.schema = {
+        "reverse": {
+            "amber": {
+                "x": {"by_path": {"SimulationMetadata.v": {}}},
+                "y": {"by_path": {"SimulationMetadata.v": {}}},
+                "z": {"by_path": {"SimulationMetadata.v": {}}},
+            }
+        },
+        "forward": {
+            "amber": {
+                "SimulationMetadata.v": [
+                    {"key": "x", "unit": "nm"},
+                    {"key": "y", "unit": "nm"},
+                    {"key": "z", "unit": "nm"},
+                ]
+            }
+        },
+    }
+    p.engine_data = {"x": 1.0, "y": 2.0, "z": 3.0}
+    p.data = {"SimulationMetadata": {}}
+
+    out = p.apply_mapping()
+    assert out["SimulationMetadata"]["v"]["vector_value"] == [1.0, 2.0, 3.0]
+
+
+def test_apply_mapping_handles_molecule_ids():
+    p = pop.MetadataPopulator(engine="amber")
+    p.converter = _NoConvert()
+    p.schema = {
+        "reverse": {
+            "amber": {"charge": {"by_path": {"SimulationMetadata.any.charge": {}}}}
+        },
+        "forward": {
+            "amber": {"SimulationMetadata.any.charge": [{"key": "charge", "unit": "e"}]}
+        },
+    }
+    p.engine_data = {"molecule_ids": {"1": {"charge": 1.0, "ignore_me": "x"}}}
+    p.data = {"SimulationMetadata": {}}
+
+    out = p.apply_mapping()
+    mol = out["SimulationMetadata"]["composition"]["molecule_ID"][0]
+    assert mol["charge"]["value"] == 1.0
+
+
+def test_parse_args_no_file_metadata(monkeypatch):
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "prog",
+            "m.json",
+            "--no-file-metadata",
+            "--engine",
+            "amber",
+            "--logfile",
+            "a.log",
+        ],
+    )
+    args = pop.parse_args()
+    assert args.store_file_metadata is False
+
+
+def test_main_prints_json_when_no_output(monkeypatch):
+    args = SimpleNamespace(
+        mappingschema="m.json",
+        biosimschema="b.yaml",
+        schema_version="latest",
+        schema_cache_dir=None,
+        update_schema=False,
+        engine="amber",
+        logfile="a.log",
+        top=None,
+        traj=None,
+        config=None,
+        store_file_metadata=False,
+        output=None,
+    )
+
+    class DummyPopulator:
+        def __init__(self, **kwargs):
+            pass
+
+        def populate(self):
+            return {"k": 1}
+
+        def validate(self, result, biosimschema_path=None):
+            assert biosimschema_path == "b.yaml"
+
+    printed = []
+    monkeypatch.setattr(pop, "parse_args", lambda: args)
+    monkeypatch.setattr(
+        pop, "resolve_schema_inputs", lambda _args: ("m.json", "b.yaml")
+    )
+    monkeypatch.setattr(pop, "MetadataPopulator", DummyPopulator)
+    monkeypatch.setattr("builtins.print", lambda s: printed.append(s))
+
+    pop.main()
+    assert printed and '"k": 1' in printed[0]
 
 
 def test_flatten_dict():
@@ -74,7 +241,10 @@ def test_metadata_populator(monkeypatch, tmp_path):
     monkeypatch.setattr(populatemetadata, "validate_metadata", lambda *a, **kw: None)
 
     pop = populatemetadata.MetadataPopulator(
-        schema_path=str(schema_path), log_file="dummy.log", engine="amber"
+        schema_path=str(schema_path),
+        log_file="dummy.log",
+        engine="amber",
+        store_file_metadata=False,
     )
     pop.load_schema()
     assert pop.schema["reverse"]["amber"]
@@ -87,7 +257,10 @@ def test_metadata_populator(monkeypatch, tmp_path):
 
     # Test populate (integration)
     pop = populatemetadata.MetadataPopulator(
-        schema_path=str(schema_path), log_file="dummy.log", engine="amber"
+        schema_path=str(schema_path),
+        log_file="dummy.log",
+        engine="amber",
+        store_file_metadata=False,
     )
     pop.data = {"SimulationMetadata": {}}
     monkeypatch.setattr(pop, "parse_log", lambda: engine_data)

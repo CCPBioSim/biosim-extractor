@@ -13,6 +13,7 @@ from biosim_extractor.gromacs.gromacslog import GromacsLogParser
 from biosim_extractor.helpers.metadata_utils import round_floats
 from biosim_extractor.mdanalysis.toptraj import TopTrajParser
 from biosim_extractor.metadata.fetchschema import get_schema, update_schema
+from biosim_extractor.metadata.filemetadata import files_metadata, group_files
 from biosim_extractor.metadata.validatemetadata import validate_metadata
 from biosim_extractor.units.unitconversion import UnitConverter
 
@@ -200,19 +201,34 @@ class MetadataPopulator:
         engine=None,
         top_file=None,
         traj_file=None,
+        store_file_metadata=True,
     ):
-        """
-        Args:
-            schema_path: Path to the extraction schema JSON file.
-            log_file: Path to the MD engine log file.
-            engine: MD engine name (``"amber"``, ``"gromacs"``).
-            top_file: Path to the topology file.
-            traj_file: Path to the trajectory file (or list of paths).
+        """Orchestrates extraction of MD engine metadata from log files (Amber/GROMACS)
+        or topology/trajectory inputs, mapping results to the `biosim-schema` format.
+
+        Features supported by this class:
+            - Reads logs via specialized parsers (`AmberLogParser`, etc.).
+            - Flattens nested structures and applies reverse-forward schema mappings.
+            - Handles unit conversions where required (e.g., kcal/mol → eV).
+            - Stores metadata about input files if `store_file_metadata=True`.
+
+        Use cases:
+            1. Batch processing logs via CLI (`--logfile`, `--engine`).
+            2. Populating a single simulation from top/traj without logs via MDAnalysis integration.
+
+        Args (constructor):
+            schema_path: Path to the engine mapping JSON file.
+            log_file: Optional MD engine log file path.
+            engine: MD engine name, such as "amber" or "gromacs".
+            top_file: Optional topology file path.
+            traj_file: Optional trajectory file path or list of trajectory paths.
+            store_file_metadata: If True, include input file metadata in the output.
         """
         self.schema_path = schema_path
         self.log_file = log_file
         self.top_file = top_file
         self.traj_file = traj_file
+        self.store_file_metadata = store_file_metadata
         self.engine = engine
         if engine:
             self.engine = engine.lower()
@@ -229,7 +245,6 @@ class MetadataPopulator:
             entries removed.
         """
         self.load_schema()
-
         if self.engine:
             self.engine_data = self.parse_log()
 
@@ -246,6 +261,18 @@ class MetadataPopulator:
 
         # self.data["SimulationMetadata"]["@type"] = "SimulationMetadata"
         result = self.data["SimulationMetadata"]
+
+        # save file metadata in dict
+        if self.store_file_metadata:
+            saved_files = {}
+            if self.log_file:
+                saved_files = group_files([self.log_file], saved_files, role="log")
+            if self.top_file and self.traj_file:
+                saved_files = group_files([self.top_file], saved_files, role="topology")
+                saved_files = group_files(
+                    self.traj_file, saved_files, role="trajectory"
+                )
+            result["files"] = files_metadata(saved_files)
 
         # Remove any dict that contains a None field
         result = remove_null_parents(result) or {}
@@ -490,7 +517,12 @@ class MetadataPopulator:
 
 
 def resolve_schema_inputs(args):
-    """Resolve mapping and biosim schema paths from args or remote schema bundle."""
+    """Resolve mapping and biosim schema paths from args or remote schema bundle.
+
+    If either path argument (`mappingschema`, `biosimschema`) is missing, the function
+    fetches a bundled schema release (optionally updating if requested). This ensures
+    downstream processing has valid JSON/YAML sources without requiring manual caching setup
+    """
     mapping_path = args.mappingschema
     biosim_path = args.biosimschema
 
@@ -559,6 +591,18 @@ def parse_args():
     parser.add_argument("--top", help="Topology file path")
     parser.add_argument("--traj", nargs="+", help="Trajectory file path")
     parser.add_argument("--config", help="Configuration file path")
+    parser.add_argument(
+        "--exclude-file-metadata",
+        action="store_false",
+        help="Include flag to include file metadata in metadata output",
+    )
+    parser.add_argument(
+        "--file-metadata",
+        dest="store_file_metadata",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Include file metadata in output (use --no-file-metadata to disable).",
+    )
     parser.add_argument("--output", "-o", help="Output file path")
 
     return parser.parse_args()
@@ -576,6 +620,7 @@ def main():
         engine=args.engine,
         top_file=args.top,
         traj_file=args.traj,
+        store_file_metadata=args.store_file_metadata,
     )
 
     result = populator.populate()

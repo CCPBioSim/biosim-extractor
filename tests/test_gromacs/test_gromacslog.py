@@ -100,3 +100,61 @@ def test_parse_with_nonexistent_file(tmp_path):
     fake_path = tmp_path / "does_not_exist.log"
     with pytest.raises(FileNotFoundError):
         GromacsLogParser(str(fake_path)).parse()
+
+
+def test_energy_timeseries_block_parsing(tmp_path):
+    log = (
+        "Step           Time\n"
+        "1 0.002\n"
+        "note\n"
+        "Energies (kJ/mol)\n"
+        "Bond Angle\n"
+        "1.0 2.0\n"
+        "LJ-14 Coulomb-14\n"
+        "3.0 4.0\n"
+        "LJ-(SR) Coulomb-(SR)\n"
+        "5.0 6.0\n"
+        "Coul.-recip. Potential\n"
+        "7.0 8.0\n"
+        "9.0 10.0 11.0\n"
+    )
+    p = tmp_path / "energy.log"
+    p.write_text(log)
+
+    parser = GromacsLogParser(str(p))
+    parser.lines = log.splitlines(True)
+    parser._parse_energy_timeseries()
+
+    assert len(parser.energy_timeseries) == 1
+    entry = parser.energy_timeseries[0]
+    assert entry["Step"] == 1
+    assert entry["Time"] == 0.002
+    assert entry["Bond"] == 1.0
+    assert entry["Pres."] == 9.0
+    assert entry["(bar)"] == 11.0
+
+
+def test_energy_timeseries_missing_energies_block(tmp_path):
+    log = "Step Time\n1 0.002\n"
+    p = tmp_path / "no_energy.log"
+    p.write_text(log)
+
+    parser = GromacsLogParser(str(p))
+    parser.lines = log.splitlines(True)
+    parser._parse_energy_timeseries()
+
+    assert parser.energy_timeseries == []
+
+
+def test_main_prints_json_without_output_arg(tmp_path, monkeypatch, capsys):
+    log = "GROMACS version: 2022.1\n"
+    p = tmp_path / "cli_stdout.log"
+    p.write_text(log)
+
+    monkeypatch.setattr("sys.argv", ["gromacslog.py", str(p)])
+    main()
+
+    out = capsys.readouterr().out
+    data = json.loads(out)
+
+    assert data["GROMACS version"] == 2022.1
