@@ -74,7 +74,10 @@ def test_metadata_populator(monkeypatch, tmp_path):
     monkeypatch.setattr(populatemetadata, "validate_metadata", lambda *a, **kw: None)
 
     pop = populatemetadata.MetadataPopulator(
-        schema_path=str(schema_path), log_file="dummy.log", engine="amber"
+        schema_path=str(schema_path),
+        log_file="dummy.log",
+        engine="amber",
+        store_file_metadata=False,
     )
     pop.load_schema()
     assert pop.schema["reverse"]["amber"]
@@ -87,7 +90,10 @@ def test_metadata_populator(monkeypatch, tmp_path):
 
     # Test populate (integration)
     pop = populatemetadata.MetadataPopulator(
-        schema_path=str(schema_path), log_file="dummy.log", engine="amber"
+        schema_path=str(schema_path),
+        log_file="dummy.log",
+        engine="amber",
+        store_file_metadata=False,
     )
     pop.data = {"SimulationMetadata": {}}
     monkeypatch.setattr(pop, "parse_log", lambda: engine_data)
