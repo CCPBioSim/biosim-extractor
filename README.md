@@ -2,8 +2,8 @@ biosim-extractor
 ================
 
 <p align="center">
-    <img src="docs/_static/logos/biosim-extractor-logo-light-text.png#gh-dark-mode-only" alt="biosim-extractor logo" width="300"/>
-    <img src="docs/_static/logos/biosim-extractor-logo-dark-text.png#gh-light-mode-only" alt="biosim-extractor logo" width="300"/>
+    <img src="docs/source/_static/logos/biosim-extractor-logo-light-text.png#gh-dark-mode-only" alt="biosim-extractor logo" width="300"/>
+    <img src="docs/source/_static/logos/biosim-extractor-logo-dark-text.png#gh-light-mode-only" alt="biosim-extractor logo" width="300"/>
 </p>
 
 biosim-extractor is a repository for extracting simulation data from output files produced from molecular dynamics (MD) simulations of biomolecules and validating against [biosim-schema](https://github.com/CCPBioSim/biosim-schema).
