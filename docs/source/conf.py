@@ -40,3 +40,7 @@ exclude_patterns = []
 
 html_theme = 'furo'
 html_static_path = ['_static']
+html_theme_options = {
+    "dark_logo": "logos/biosim-extractor-logo-light-text.png",
+    "light_logo": "logos/biosim-extractor-logo-dark-text.png",
+}
