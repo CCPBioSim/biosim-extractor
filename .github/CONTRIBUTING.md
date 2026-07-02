@@ -1,6 +1,6 @@
-# Contributing to REPO-NAME
+# Contributing to biosim-extractor
 
-Thank you for your interest in contributing to **REPO-NAME**!
+Thank you for your interest in contributing to **biosim-extractor**!
 
 We’re excited to collaborate with developers, researchers, and community members to make REPO-NAME better for everyone.
 
@@ -62,4 +62,4 @@ Well-documented issues help us address problems faster and keep REPO-NAME stable
 
 ---
 
-Thank you for helping improve **REPO-NAME**, your contributions make open source stronger!
+Thank you for helping improve **biosim-extractor**, your contributions make open source stronger!
