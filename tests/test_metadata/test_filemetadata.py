@@ -1,6 +1,20 @@
 from pathlib import Path
 
-from biosim_extractor.metadata.filemetadata import file_metadata, files_metadata
+from biosim_extractor.metadata.filemetadata import (
+    file_metadata,
+    files_metadata,
+    group_files,
+)
+
+
+def test_group_files_creates_dict_when_none():
+    out = group_files(["a.log"], saved_files=None, role="log")
+    assert out == {"log": ["a.log"]}
+
+
+def test_group_files_appends_to_existing_role():
+    out = group_files(["b.log"], saved_files={"log": ["a.log"]}, role="log")
+    assert out == {"log": ["a.log", "b.log"]}
 
 
 def test_single_file(tmp_path):

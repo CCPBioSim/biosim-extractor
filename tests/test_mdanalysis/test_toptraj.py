@@ -1,10 +1,99 @@
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 import biosim_extractor.mdanalysis.toptraj as toptraj
 
-# --- Helpers ---
+
+def test_get_protein_sequence_returns_none_on_exception():
+    fragment = MagicMock()
+    fragment.select_atoms.side_effect = RuntimeError("boom")
+    assert toptraj.get_protein_sequence(fragment) is None
+
+
+def test_get_nucleic_sequence_returns_none_on_exception():
+    fragment = MagicMock()
+    fragment.select_atoms.side_effect = RuntimeError("boom")
+    assert toptraj.get_nucleic_sequence(fragment) is None
+
+
+def test_classify_box_hexagonal_angle_branch():
+    # Covers the 90,90,120 branch
+    assert toptraj.classify_box([10, 20, 30, 90, 90, 120]) == "orthorhombic"
+
+
+@patch("biosim_extractor.mdanalysis.toptraj.Universe")
+def test_parse_handles_non_callable_toptraj_extract(mock_universe, monkeypatch):
+    u = MagicMock()
+    u.atoms.fragments = []
+    mock_universe.return_value = u
+    monkeypatch.setattr(toptraj, "TOPTRAJ_AUTO_EXTRACT", {"constant_field": 123})
+
+    parser = toptraj.TopTrajParser("top", "traj")
+    out = parser.parse()
+    assert out["constant_field"] == 123
+
+
+def test_find_molecule_ids_atom_formula_fallback(monkeypatch):
+    parser = object.__new__(toptraj.TopTrajParser)
+    parser.data = {}
+    atom = SimpleNamespace(name="C12")  # no .element -> fallback strips digits
+    frag = MagicMock()
+    frag.atoms = MagicMock()
+    frag.atoms.__getitem__.return_value = atom
+
+    parser.molecule_types = {(("X",), ("C12",)): {"count": 1, "fragment": frag}}
+
+    monkeypatch.setattr(toptraj, "MOLID_AUTO_EXTRACT", {})
+    parser._find_molecule_IDs()
+    assert parser.data["molecule_ids"][0]["molecular_formula"] == "C"
+
+
+def test_find_molecule_ids_rdkit_failure_continue(monkeypatch):
+    parser = object.__new__(toptraj.TopTrajParser)
+    parser.data = {}
+    frag = MagicMock()
+    frag.convert_to.side_effect = ValueError("rdkit fail")
+
+    parser.molecule_types = {(("ALA",), ("N", "CA")): {"count": 1, "fragment": frag}}
+
+    monkeypatch.setattr(toptraj, "MOLID_AUTO_EXTRACT", {})
+    parser._find_molecule_IDs()
+    assert "InChIKey" not in parser.data["molecule_ids"][0]
+
+
+def test_find_molecule_ids_non_callable_molid_and_sequence(monkeypatch):
+    parser = object.__new__(toptraj.TopTrajParser)
+    parser.data = {}
+    frag = MagicMock()
+
+    parser.molecule_types = {
+        (("ALA", "GLY"), ("N", "CA")): {"count": 1, "fragment": frag}
+    }
+
+    monkeypatch.setattr(toptraj, "MOLID_AUTO_EXTRACT", {"kind": "peptide"})
+    monkeypatch.setattr(toptraj, "SEQUENCE_AUTO_EXTRACT", {"source": "fallback"})
+    parser._find_molecule_IDs()
+
+    m = parser.data["molecule_ids"][0]
+    assert m["kind"] == "peptide"
+    assert m["source"] == "fallback"
+
+
+def test_main_writes_output_file(monkeypatch, tmp_path):
+    out = tmp_path / "result.json"
+    args = SimpleNamespace(topology="top", trajectory=["traj"], output=str(out))
+
+    monkeypatch.setattr(toptraj, "parse_args", lambda: args)
+
+    fake_parser = MagicMock()
+    fake_parser.parse.return_value = {"foo": "bar"}
+    monkeypatch.setattr(toptraj, "TopTrajParser", lambda *_: fake_parser)
+
+    toptraj.main()
+    assert out.exists()
+    assert '"foo": "bar"' in out.read_text()
 
 
 def make_mock_atoms(length, names=None):
@@ -24,9 +113,6 @@ def make_mock_residues(length, resnames=None):
     if resnames:
         residues.resnames = resnames
     return residues
-
-
-# --- Tests ---
 
 
 @pytest.mark.parametrize(
