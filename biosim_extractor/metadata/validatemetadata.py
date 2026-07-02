@@ -4,9 +4,23 @@ Validation utilities for extracted MD simulation metadata against the biosim Lin
 """
 
 import os
+import re
 import warnings
+from pathlib import Path
 
 from linkml.validator import validate
+
+
+def extract_schema_version(schema_path):
+    if not schema_path or str(schema_path).startswith("http"):
+        return None
+
+    text = Path(schema_path).read_text(encoding="utf-8")
+    m = re.search(
+        r"(?m)^version:\s*['\"]?([^\r\n'\"#]+)['\"]?\s*(?:#.*)?$",
+        text,
+    )
+    return m.group(1).strip() if m else None
 
 
 def validate_metadata(result, biosimschema_path=None, strict=False):
@@ -48,6 +62,11 @@ def validate_extracted(instance, schema_path):
     Returns:
         list: Validation error messages. An empty list means the instance is valid.
     """
+
+    schema_version = extract_schema_version(schema_path)
+    if schema_version and isinstance(instance, dict):
+        instance.setdefault("biosim_schema_version", schema_version)
+
     errors = []
 
     errors.extend(_validate_all_vector_values(instance))
