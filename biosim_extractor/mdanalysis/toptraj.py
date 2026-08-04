@@ -9,6 +9,7 @@ from collections import Counter
 
 import numpy as np
 from MDAnalysis import Universe
+from MDAnalysis.exceptions import NoDataError
 from rdkit import Chem
 
 alternative_residue_names = {
@@ -135,18 +136,50 @@ def safe_extract(func):
 
 
 TOPTRAJ_AUTO_EXTRACT = {
-    "total_atom_count": lambda u: safe_extract(lambda: u.atoms.n_atoms),
-    "total_molecule_count": lambda u: safe_extract(lambda: len(u.atoms.fragments)),
-    "frame_count": lambda u: safe_extract(lambda: len(u.trajectory)),
-    "system_charge": lambda u: safe_extract(lambda: sum(list(u.atoms.charges))),
+    "total_atom_count": lambda u: safe_extract(
+        lambda: u.atoms.n_atoms if getattr(u, "atoms", None) is not None else None
+    ),
+    "total_molecule_count": lambda u: safe_extract(
+        lambda: len(u.atoms.fragments)
+        if getattr(u, "atoms", None) is not None and hasattr(u.atoms, "fragments")
+        else None
+    ),
+    "frame_count": lambda u: safe_extract(
+        lambda: len(u.trajectory)
+        if getattr(u, "trajectory", None) is not None
+        else None
+    ),
+    "system_charge": lambda u: safe_extract(
+        lambda: sum(charges)
+        if (charges := getattr(u.atoms, "charges", None)) is not None
+        else None
+    ),
     "box_dimensions": lambda u: safe_extract(
-        lambda: np.mean([f.dimensions[:3] for f in u.trajectory], axis=0)
+        lambda: np.mean(dims, axis=0)
+        if (
+            dims := [f.dimensions[:3] for f in u.trajectory if f.dimensions is not None]
+        )
+        else None
     ),
     "box_angles": lambda u: safe_extract(
-        lambda: list(u.trajectory[0].dimensions[3:].flatten())
+        lambda: list(dim[3:].flatten())
+        if (
+            dim := next(
+                (f.dimensions for f in u.trajectory if f.dimensions is not None), None
+            )
+        )
+        is not None
+        else None
     ),
     "box_type": lambda u: safe_extract(
-        lambda: classify_box(u.trajectory[0].dimensions)
+        lambda: classify_box(dim)
+        if (
+            dim := next(
+                (f.dimensions for f in u.trajectory if f.dimensions is not None), None
+            )
+        )
+        is not None
+        else None
     ),
     "water": lambda u: safe_extract(lambda: len(u.select_atoms("water")) > 0),
     "positions": lambda u: safe_extract(
@@ -231,11 +264,9 @@ class TopTrajParser:
             dict: Extracted metadata.
         """
         for field, func in TOPTRAJ_AUTO_EXTRACT.items():
-            key = field
-            if callable(func):
-                self.data[key] = func(self.u)
-            else:
-                self.data[key] = func
+            value = func(self.u) if callable(func) else func
+            if value is not None:
+                self.data[field] = value
 
         self._extract_molecules()
 
@@ -252,15 +283,25 @@ class TopTrajParser:
             None
         """
 
+        try:
+            fragments = list(self.u.atoms.fragments)
+        except NoDataError:
+            fragments = []
+
+        if not fragments:
+            self.molecule_types = {}
+            self.data["molecule_ids"] = {}
+            return
+
         # Group by molecule signature
         molecule_types = Counter(
             (tuple(fragment.resnames), tuple(fragment.atoms.names))
-            for fragment in self.u.atoms.fragments
+            for fragment in fragments
         )
 
         # Get first representative fragment of each type
         representatives = {}
-        for fragment in self.u.atoms.fragments:
+        for fragment in fragments:
             signature = (tuple(fragment.resnames), tuple(fragment.atoms.names))
             if signature not in representatives:
                 representatives[signature] = {
