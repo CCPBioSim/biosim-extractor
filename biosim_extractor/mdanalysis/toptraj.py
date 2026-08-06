@@ -12,7 +12,7 @@ from MDAnalysis import Universe
 from MDAnalysis.exceptions import NoDataError
 from rdkit import Chem
 
-alternative_residue_names = {
+ALTERNATIVE_RESIDUE_NAMES = {
     "ALAD": "ALA",
     "ASH": "ASP",
     "ASPH": "ASP",
@@ -26,6 +26,28 @@ alternative_residue_names = {
     "CYX": "CYS",
     "LYN": "LYS",
 }
+
+MARTINI_BEAD_NAMES = [
+    "BB",
+    "SC1",
+    "SC2",
+    "SC3",
+    "SC4",
+    "SC5",
+    "NC3",
+    "PO4",
+    "GL1",
+    "GL2",
+    "C1A",
+    "D2A",
+    "C3A",
+    "C4A",
+    "C1B",
+    "C2B",
+    "C3B",
+    "C4B",
+]
+BEAD_SEL_STRING = "name " + " ".join(MARTINI_BEAD_NAMES)
 
 
 def get_protein_sequence(fragment):
@@ -47,7 +69,7 @@ def get_protein_sequence(fragment):
         if len(protein_atoms) > 0:
             protein_residues = protein_atoms.residues
             # Handle alternative residue names
-            for old_name, new_name in alternative_residue_names.items():
+            for old_name, new_name in ALTERNATIVE_RESIDUE_NAMES.items():
                 for residue in protein_residues:
                     if residue.resname == old_name:
                         residue.resname = new_name
@@ -201,6 +223,9 @@ TOPTRAJ_AUTO_EXTRACT = {
     "fixed_charges": lambda u: safe_extract(
         lambda: getattr(u.atoms, "charges", None) is not None
     ),
+    "coarse_grained": lambda u: safe_extract(
+        lambda: len(u.select_atoms(BEAD_SEL_STRING)) > 0
+    ),
 }
 
 
@@ -213,6 +238,16 @@ MOLID_AUTO_EXTRACT = {
     "molecular_weight": lambda fragment: float(sum(fragment.masses))
     if hasattr(fragment, "masses")
     else None,
+    "simulated_particle_names": lambda fragment: (
+        ", ".join(list(fragment.atoms.names))
+        if len(fragment.resnames) > 0 and len(set(fragment.resnames)) == 1
+        else None
+    ),
+    "simulated_molecule_name": lambda fragment: (
+        fragment.resnames[0]
+        if len(fragment.resnames) > 0 and len(set(fragment.resnames)) == 1
+        else None
+    ),
 }
 
 
@@ -252,6 +287,7 @@ class TopTrajParser:
         self.lines = []
         self.data = {}
         self.molecule_types = {}
+        self.cg = False
 
     # =========================
     # MAIN ENTRY
@@ -288,6 +324,10 @@ class TopTrajParser:
         except NoDataError:
             fragments = []
 
+        # check if system is coarse-grained
+        if len(self.u.select_atoms(BEAD_SEL_STRING)) > 0:
+            self.cg = True
+
         if not fragments:
             self.molecule_types = {}
             self.data["molecule_ids"] = {}
@@ -303,7 +343,8 @@ class TopTrajParser:
         representatives = {}
         for fragment in fragments:
             signature = (tuple(fragment.resnames), tuple(fragment.atoms.names))
-            if signature not in representatives:
+            molecular_weight = float(sum(fragment.masses))
+            if signature not in representatives and molecular_weight != 0:
                 representatives[signature] = {
                     "count": molecule_types[signature],
                     "fragment": fragment,  # Store the actual AtomGroup
@@ -337,10 +378,13 @@ class TopTrajParser:
                     molecule_ids[i][key] = func
 
             if len(mol_atoms) == 1:
-                atom = fragment.atoms[0]
-                molecule_ids[i]["molecular_formula"] = getattr(
-                    atom, "element", atom.name.strip("0123456789")
-                )
+                if not self.cg:
+                    atom = fragment.atoms[0]
+                    molecule_ids[i]["molecular_formula"] = getattr(
+                        atom, "element", atom.name.strip("0123456789")
+                    )
+                else:
+                    continue
             elif len(set(mol_residues)) == 1 and len(mol_atoms) > 1:
                 try:
                     # Attempt RDKit conversion first
@@ -368,23 +412,6 @@ class TopTrajParser:
 
         self.data["molecule_ids"] = molecule_ids
         return self.data
-
-
-# # =========================
-# # USAGE
-# # =========================
-# if __name__ == "__main__":
-#     topology = sys.argv[1]
-#     trajectory = sys.argv[2]
-#     parser = TopTrajParser(topology, trajectory)
-#     result = parser.parse()
-
-#     print(json.dumps(result, indent=2))
-
-
-# =========================
-# ENTRY POINT
-# =========================
 
 
 def parse_args():

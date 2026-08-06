@@ -38,6 +38,7 @@ def test_parse_handles_non_callable_toptraj_extract(mock_universe, monkeypatch):
 def test_find_molecule_ids_atom_formula_fallback(monkeypatch):
     parser = object.__new__(toptraj.TopTrajParser)
     parser.data = {}
+    parser.cg = False
     atom = SimpleNamespace(name="C12")  # no .element -> fallback strips digits
     frag = MagicMock()
     frag.atoms = MagicMock()
@@ -290,10 +291,12 @@ def test_toptrajparser_find_molecule_ids_peptide_and_atom(mock_universe):
     atom_fragment.residues = make_mock_residues(1)
     atom_fragment.atoms[0].element = "H"
     atom_fragment.atoms[0].name = "H1"
+    atom_fragment.masses = [1.0]
     # Peptide fragment
     peptide_fragment = MagicMock()
     peptide_fragment.atoms = make_mock_atoms(2, names=["N", "CA"])
     peptide_fragment.residues = make_mock_residues(2, resnames=["ALA", "GLY"])
+    peptide_fragment.masses = [12.0, 14.0]
     peptide_fragment.convert_to.return_value = MagicMock()
     mock_u.atoms.fragments = [atom_fragment, peptide_fragment]
     mock_trajectory = MagicMock()
