@@ -38,6 +38,7 @@ dependencies = [
     "biopython==1.87",
     "rdkit>=2025.9.5",
     "linkml==1.11.1",
+    "xxhash==4.0.1",
 ]
 
 [project.urls]

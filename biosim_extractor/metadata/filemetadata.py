@@ -3,6 +3,8 @@
 import hashlib
 from pathlib import Path
 
+import xxhash
+
 
 def file_metadata(path, role="other", hash_algorithm="md5"):
     """Extract name, size (MB), and hash of a single file.
@@ -10,24 +12,31 @@ def file_metadata(path, role="other", hash_algorithm="md5"):
     Args:
         path: Input file path (str or :class:`pathlib.Path`).
         role: Optional category label for the file. Defaults to "other".
-        hash_algorithm: Hash function identifier ('md5', 'sha256'). Default is 'md5'.
+        hash_algorithm: Hash function identifier ('md5', 'sha256', 'xxh3_64').
+        Default is 'md5'.
 
     Returns:
         Dictionary containing 'file_name', 'file_size' (dict), 'file_hash',
         'file_hash_algorithm', and 'file_role'.
     """
     path = Path(path)
-    digest = hashlib.new(hash_algorithm)
     size_mb = path.stat().st_size / 1_000_000
 
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
+    if hash_algorithm == "xxh3_64":
+        hasher = xxhash.xxh3_64()
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(8 * 1024 * 1024), b""):
+                hasher.update(chunk)
+        file_hash = hasher.hexdigest()
+    else:
+        with path.open("rb") as handle:
+            digest = hashlib.file_digest(handle, hash_algorithm)
+            file_hash = digest.hexdigest()
 
     return {
         "file_name": path.name,
         "file_size": {"value": round(size_mb, 6), "value_unit": "MB"},
-        "file_hash": digest.hexdigest(),
+        "file_hash": file_hash,
         "file_hash_algorithm": hash_algorithm,
         "file_role": role,
     }
