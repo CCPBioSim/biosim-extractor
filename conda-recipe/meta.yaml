@@ -30,6 +30,7 @@ requirements:
     - biopython >=1.87,<2
     - rdkit >=2025.9.5,<2026
     - linkml >=1.11.1,<2.0
+    - xxhash >=4.0.1,<5.0
 
 test:
   imports:
