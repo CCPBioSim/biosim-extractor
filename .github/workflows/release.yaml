@@ -215,8 +215,26 @@ jobs:
           auto-activate: true
           activate-environment: base
           conda-remove-defaults: true
-          channels: CCPBioSim,conda-forge
+          channels: ccpbiosim,conda-forge
           channel-priority: strict
+
+      - name: Configure Conda channels
+        shell: bash -l {0}
+        run: |
+          conda config --remove-key channels || true
+          conda config --add channels https://conda.anaconda.org/ccpbiosim
+          conda config --add channels https://conda.anaconda.org/conda-forge
+          conda config --set channel_priority strict
+          conda config --show channels
+
+      - name: Verify biosim-schema
+        shell: bash -l {0}
+        run: |
+          conda search \
+            --override-channels \
+            -c https://conda.anaconda.org/ccpbiosim \
+            -c https://conda.anaconda.org/conda-forge \
+            "biosim-schema>=1.0,<2.0"
 
       - name: Install build tools
         shell: bash -l {0}
@@ -231,15 +249,20 @@ jobs:
         env:
           PIP_NO_INDEX: "0"
         run: |
-          PKG_PATH=$(conda build conda-recipe -c CCPBioSim -c conda-forge --output)
+          PKG_PATH=$(conda build conda-recipe \
+            --override-channel \
+            -c https://conda.anaconda.org/ccpbiosim \
+            -c https://conda.anaconda.org/conda-forge \
+            --output)
+
           echo "PKG_PATH=$PKG_PATH" >> "$GITHUB_ENV"
 
           conda build conda-recipe \
-            -c CCPBioSim \
-            -c conda-forge \
-            --override-channel
+            --override-channel \
+            -c https://conda.anaconda.org/ccpbiosim \
+            -c https://conda.anaconda.org/conda-forge
+
           test -f "$PKG_PATH"
-          echo "Built: $PKG_PATH"
 
       - name: Upload to Anaconda
         shell: bash -l {0}
