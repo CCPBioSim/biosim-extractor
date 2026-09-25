@@ -39,7 +39,7 @@ dependencies = [
     "rdkit>=2025.9.5",
     "linkml==1.11.1",
     "xxhash>=3.6,<5",
-    "biosim_schema>=1.0,<2.0",
+    "biosim-schema>=1.0,<2.0",
 ]
 
 [project.urls]
