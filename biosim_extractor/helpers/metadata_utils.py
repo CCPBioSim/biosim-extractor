@@ -31,3 +31,22 @@ def round_floats(obj, decimals=3, preserve_below=1e-3):
         return {k: round_floats(v, decimals, preserve_below) for k, v in obj.items()}
 
     return obj
+
+
+def merge_metadata(existing, incoming):
+    if not existing:
+        return incoming
+    if not incoming:
+        return existing
+
+    for key, value in incoming.items():
+        if (
+            key in existing
+            and isinstance(existing[key], dict)
+            and isinstance(value, dict)
+        ):
+            merge_metadata(existing[key], value)
+        else:
+            existing[key] = value
+
+    return existing
