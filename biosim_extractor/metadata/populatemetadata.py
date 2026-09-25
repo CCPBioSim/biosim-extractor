@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 from biosim_extractor.amber.amberlog import AmberLogParser
 from biosim_extractor.gromacs.gromacslog import GromacsLogParser
-from biosim_extractor.helpers.metadata_utils import round_floats
+from biosim_extractor.helpers.metadata_utils import merge_metadata, round_floats
 from biosim_extractor.mdanalysis.toptraj import TopTrajParser
 from biosim_extractor.metadata.fetchschema import get_schema, update_schema
 from biosim_extractor.metadata.filemetadata import files_metadata, group_files
@@ -257,7 +257,9 @@ class MetadataPopulator:
             self.data = self.apply_mapping()
 
         if self.top_file and self.traj_file:
-            self.data = self.populate_toptraj()
+            toptraj_data = self.populate_toptraj()
+            if toptraj_data is not None:
+                self.data = merge_metadata(self.data, toptraj_data)
 
         # self.data["SimulationMetadata"]["@type"] = "SimulationMetadata"
         result = self.data["SimulationMetadata"]
@@ -526,7 +528,6 @@ def resolve_schema_inputs(args):
     mapping_path = args.mappingschema
     biosim_path = args.biosimschema
 
-    # If either path is missing, fetch a schema bundle and fill defaults.
     if not mapping_path or not biosim_path:
         bundle = (
             update_schema(
@@ -539,6 +540,7 @@ def resolve_schema_inputs(args):
                 cache_dir=args.schema_cache_dir,
             )
         )
+
         mapping_path = mapping_path or str(bundle.mapping_json)
         biosim_path = biosim_path or str(bundle.schema_yaml)
 
