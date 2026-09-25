@@ -257,7 +257,7 @@ class MetadataPopulator:
             self.data = self.apply_mapping()
 
         if self.top_file and self.traj_file:
-            self.data = self.populate_toptraj()
+            self.populate_toptraj()
 
         # self.data["SimulationMetadata"]["@type"] = "SimulationMetadata"
         result = self.data["SimulationMetadata"]
@@ -526,19 +526,25 @@ def resolve_schema_inputs(args):
     mapping_path = args.mappingschema
     biosim_path = args.biosimschema
 
-    # If either path is missing, fetch a schema bundle and fill defaults.
+    # If either path is missing, fetch a schema bundle from package if available, or download and fill defaults.
     if not mapping_path or not biosim_path:
-        bundle = (
-            update_schema(
-                version=args.schema_version,
-                cache_dir=args.schema_cache_dir,
+        try:
+            from biosim_schema.utils.paths import engine_mappings_path, schema_yaml_path
+
+            mapping_path = mapping_path or engine_mappings_path()
+            biosim_path = biosim_path or schema_yaml_path()
+        except ImportError:
+            bundle = (
+                update_schema(
+                    version=args.schema_version,
+                    cache_dir=args.schema_cache_dir,
+                )
+                if args.update_schema
+                else get_schema(
+                    version=args.schema_version,
+                    cache_dir=args.schema_cache_dir,
+                )
             )
-            if args.update_schema
-            else get_schema(
-                version=args.schema_version,
-                cache_dir=args.schema_cache_dir,
-            )
-        )
         mapping_path = mapping_path or str(bundle.mapping_json)
         biosim_path = biosim_path or str(bundle.schema_yaml)
 
