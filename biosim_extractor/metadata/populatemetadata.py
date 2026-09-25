@@ -8,6 +8,8 @@ import argparse
 import json
 from typing import Any, Dict
 
+from biosim_schema.utils.paths import engine_mappings_path, schema_yaml_path
+
 from biosim_extractor.amber.amberlog import AmberLogParser
 from biosim_extractor.gromacs.gromacslog import GromacsLogParser
 from biosim_extractor.helpers.metadata_utils import round_floats
@@ -611,6 +613,11 @@ def parse_args():
 def main():
     """Entry point: parse args, resolve schema sources, run pipeline, validate, write output."""
     args = parse_args()
+
+    # use schema if paths not set
+    if not args.mappingschema or not args.biosimschema:
+        mapping_path = engine_mappings_path()
+        biosim_path = schema_yaml_path()
 
     mapping_path, biosim_path = resolve_schema_inputs(args)
 
