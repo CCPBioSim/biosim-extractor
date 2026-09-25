@@ -31,6 +31,7 @@ requirements:
     - rdkit >=2025.9.5,<2026
     - linkml >=1.11.1,<2.0
     - python-xxhash >=3.6,<5.0
+    - biosim-schema >=1.0,<2.0
 
 test:
   imports:
