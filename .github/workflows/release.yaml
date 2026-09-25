@@ -215,7 +215,7 @@ jobs:
           auto-activate: true
           activate-environment: base
           conda-remove-defaults: true
-          channels: CCPBioSim,conda-forge
+          channels: ccpbiosim,conda-forge
           channel-priority: strict
 
       - name: Install build tools
