@@ -7,7 +7,6 @@ import argparse
 import json
 from collections import Counter
 
-import numpy as np
 from MDAnalysis import Universe
 from MDAnalysis.exceptions import NoDataError
 from rdkit import Chem
@@ -177,30 +176,30 @@ TOPTRAJ_AUTO_EXTRACT = {
         else None
     ),
     "box_dimensions": lambda u: safe_extract(
-        lambda: np.mean(dims, axis=0)
+        lambda: u.trajectory[0].dimensions[:3]
         if (
-            dims := [f.dimensions[:3] for f in u.trajectory if f.dimensions is not None]
+            getattr(u, "trajectory", None) is not None
+            and len(u.trajectory) > 0
+            and u.trajectory[0].dimensions is not None
         )
         else None
     ),
     "box_angles": lambda u: safe_extract(
-        lambda: list(dim[3:].flatten())
+        lambda: u.trajectory[0].dimensions[3:]
         if (
-            dim := next(
-                (f.dimensions for f in u.trajectory if f.dimensions is not None), None
-            )
+            getattr(u, "trajectory", None) is not None
+            and len(u.trajectory) > 0
+            and u.trajectory[0].dimensions is not None
         )
-        is not None
         else None
     ),
     "box_type": lambda u: safe_extract(
-        lambda: classify_box(dim)
+        lambda: classify_box(u.trajectory[0].dimensions)
         if (
-            dim := next(
-                (f.dimensions for f in u.trajectory if f.dimensions is not None), None
-            )
+            getattr(u, "trajectory", None) is not None
+            and len(u.trajectory) > 0
+            and u.trajectory[0].dimensions is not None
         )
-        is not None
         else None
     ),
     "water": lambda u: safe_extract(lambda: len(u.select_atoms("water")) > 0),
@@ -305,9 +304,6 @@ class TopTrajParser:
                 self.data[field] = value
 
         self._extract_molecules()
-
-        # print(json.dumps(self.data, indent=2))
-        # print()
 
         return self.data
 
