@@ -313,7 +313,13 @@ def test_resolve_schema_inputs_uses_explicit_paths_without_fetch(monkeypatch):
 
 
 def test_resolve_schema_inputs_fetches_missing_paths(monkeypatch):
-    args = _args(mappingschema=None, biosimschema=None, update_schema=False)
+    args = _args(
+        mappingschema=None,
+        biosimschema=None,
+        update_schema=False,
+        mapping_path=None,
+        biosim_path=None,
+    )
 
     bundle = SimpleNamespace(
         mapping_json=Path("/cache/v1/project/schema_enginemappings.json"),
@@ -349,6 +355,8 @@ def test_resolve_schema_inputs_uses_update_schema_when_requested(monkeypatch):
         schema_version="0.0.2",
         schema_cache_dir="/tmp/schema-cache",
         update_schema=True,
+        mapping_path=None,
+        biosim_path=None,
     )
 
     bundle = SimpleNamespace(
