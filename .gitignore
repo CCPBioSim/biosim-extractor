@@ -210,3 +210,6 @@ __marimo__/
 # scripts and outputs
 run_commands.sh
 file.log
+
+# vim
+.*.swp
