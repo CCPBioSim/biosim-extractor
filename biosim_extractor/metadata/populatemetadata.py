@@ -319,9 +319,6 @@ class MetadataPopulator:
             raise ValueError(f"Unsupported engine: {self.engine}")
 
         raw = parser.parse()
-        # print(json.dumps(raw, indent=2))
-        # print("----------")
-        # print(json.dumps(flatten_dict(raw), indent=2))
 
         return flatten_dict(raw)
 
@@ -527,8 +524,8 @@ def resolve_schema_inputs(args):
     fetches a bundled schema release (optionally updating if requested). This ensures
     downstream processing has valid JSON/YAML sources without requiring manual caching setup
     """
-    mapping_path = args.mappingschema
-    biosim_path = args.biosimschema
+    mapping_path = args.mappingschema or args.mapping_path
+    biosim_path = args.biosimschema or args.biosim_path
 
     if not mapping_path or not biosim_path:
         bundle = (
@@ -618,8 +615,8 @@ def main():
 
     # use schema if paths not set
     if not args.mappingschema or not args.biosimschema:
-        mapping_path = engine_mappings_path()
-        biosim_path = schema_yaml_path()
+        args.mapping_path = engine_mappings_path()
+        args.biosim_path = schema_yaml_path()
 
     mapping_path, biosim_path = resolve_schema_inputs(args)
 
