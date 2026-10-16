@@ -37,7 +37,7 @@ dependencies = [
     "MDAnalysis==2.10.0",
     "biopython==1.88",
     "rdkit>=2025.9.5",
-    "linkml==1.11.1",
+    "linkml==1.12.0",
     "xxhash>=3.6,<5",
     "biosim-schema>=1.0,<2.0",
 ]
