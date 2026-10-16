@@ -1,6 +1,7 @@
-shortdesc: ""
-longdesc: ""
+shortdesc: "A tool for extracting metadata from MD simulation outputs"
+longdesc: "biosim-extractor is a tool for extracting simulation data from output files produced from molecular dynamics (MD) simulations of biomolecules and validating against biosim-schema"
 category: "data-tools"
-image: ""
+image: "biosim-extractor-logo.svg"
 pypi: true
 conda: true
+ghcr: false
