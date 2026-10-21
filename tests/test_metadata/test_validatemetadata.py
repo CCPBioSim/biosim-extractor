@@ -34,8 +34,8 @@ def test_validate_extracted_matrix_and_vector(monkeypatch):
     # Patch validate to return a dummy report
     class DummyReport:
         results = [
-            types.SimpleNamespace(message="errA"),
-            types.SimpleNamespace(message="errB"),
+            types.SimpleNamespace(message="errA", context=[]),
+            types.SimpleNamespace(message="errB", context=["subErr"]),
         ]
 
     monkeypatch.setattr(vs, "validate", lambda *a, **kw: DummyReport())
@@ -45,6 +45,7 @@ def test_validate_extracted_matrix_and_vector(monkeypatch):
     }
     errors = vs.validate_extracted(instance, schema_path="dummy.yaml")
     assert "errA" in errors and "errB" in errors
+    assert "    ↳ subErr" in errors
 
 
 def test__validate_all_vector_values_flat_and_matrix():

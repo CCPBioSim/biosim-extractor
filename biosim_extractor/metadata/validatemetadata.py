@@ -11,6 +11,15 @@ from pathlib import Path
 from linkml.validator import validate
 
 
+class MetadataValidationError(ValueError):
+    """Raised in strict mode; holds every validation message in ``errors``."""
+
+    def __init__(self, errors, heading="Schema validation failed:"):
+        self.errors = list(errors)
+        self.heading = heading
+        super().__init__(heading + "\n" + "\n".join(self.errors))
+
+
 def extract_schema_version(schema_path):
     """Extract the biosim schema version from a local schema YAML file.
 
@@ -42,18 +51,14 @@ def validate_metadata(result, biosimschema_path=None, strict=False):
     Args:
         result: Populated metadata dictionary to validate.
         biosimschema_path: Path or URL to the biosim schema YAML. If ``None``, validation is skipped.
-        strict: If ``True``, raises ``ValueError`` on validation errors; otherwise emits a warning.
-
-    Raises:
-        ValueError: If ``strict=True`` and validation errors are found.
+        strict: If ``True``, raises ``MetadataValidationError`` on validation errors; otherwise emits a warning.
     """
     if biosimschema_path:
         errors = validate_extracted(result, biosimschema_path)
         if errors:
             if strict:
-                raise ValueError("Schema validation failed:\n" + "\n".join(errors))
-            else:
-                warnings.warn("Schema validation warnings:\n" + "\n".join(errors))
+                raise MetadataValidationError(errors)
+            warnings.warn("Schema validation warnings:\n" + "\n".join(errors))
 
 
 def validate_extracted(instance, schema_path):
@@ -84,20 +89,50 @@ def validate_extracted(instance, schema_path):
 
     errors.extend(_validate_all_vector_values(instance))
 
+    for error in _validate_units_present(instance):
+        if error not in errors:
+            errors.append(error)
+
+    for error in _validate_all_vector_values(instance):
+        if error not in errors:
+            errors.append(error)
+
     stripped = _strip_all_matrix_vector_values(instance)
 
     if schema_path.startswith("http"):
         # SchemaView resolves relative imports from the base URL — no chdir needed
         report = validate(stripped, schema_path, "SimulationMetadata")
+        for r in report.results:
+            errors.append(r.message)
+            # sub-errors hidden by anyOf/oneOf collapsing
+            errors.extend(f"    ↳ {c}" for c in (r.context or []))
     else:
         orig_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.abspath(schema_path)))
         try:
             report = validate(stripped, schema_path, "SimulationMetadata")
+            for r in report.results:
+                errors.append(r.message)
+                # sub-errors hidden by anyOf/oneOf collapsing
+                errors.extend(f"    ↳ {c}" for c in (r.context or []))
         finally:
             os.chdir(orig_dir)
 
-    errors.extend(r.message for r in report.results)
+    return errors
+
+
+def _validate_units_present(instance, path=""):
+    errors = []
+    if isinstance(instance, dict):
+        if "vector_value" in instance and "value_unit" not in instance:
+            errors.append(
+                f"{path or '<root>'}: value_unit is required when a value is provided"
+            )
+        for k, v in instance.items():
+            errors.extend(_validate_units_present(v, f"{path}.{k}" if path else k))
+    elif isinstance(instance, list):
+        for i, v in enumerate(instance):
+            errors.extend(_validate_units_present(v, f"{path}[{i}]"))
     return errors
 
 
