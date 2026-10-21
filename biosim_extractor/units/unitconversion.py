@@ -94,6 +94,7 @@ class UnitConverter:
             },
             "compressibility": {
                 "1/bar": 1.0,
+                "1/Pa": 1e-5,
                 "bar^-1": 1.0,
                 "1e10-6 bar^-1": 1e-6,
                 "1e10-6 1/bar": 1e-6,
@@ -175,16 +176,12 @@ class UnitConverter:
             raise ValueError(f"Unknown {unit_type} unit: {from_unit}")
 
         # Handle temperature conversions (functions instead of factors)
-        if callable(factor):
-            if isinstance(value, list):
-                result = [factor(x) for x in value]
-            else:
-                result = factor(value)
-        else:
-            if isinstance(value, list):
-                result = [x * factor for x in value]
-            else:
-                result = value * factor
+        def apply_conversion(item):
+            if isinstance(item, list):
+                return [apply_conversion(v) for v in item]
+            return factor(item) if callable(factor) else item * factor
+
+        result = apply_conversion(value)
 
         # Apply rounding if requested
         if decimals is not None:
