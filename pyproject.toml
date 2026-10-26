@@ -34,7 +34,7 @@ classifiers = [
 keywords = ["molecular dynamics", "parser", "schema"]
 
 dependencies = [
-    "MDAnalysis==2.10.0",
+    "MDAnalysis==2.11.0",
     "biopython==1.88",
     "rdkit>=2025.9.5",
     "linkml==1.12.1",
