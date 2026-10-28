@@ -1,5 +1,6 @@
 {% set name = "biosim-extractor" %}
 {% set version = "1.2.0" %}
+{% set pyproject = load_file_data("../pyproject.toml", from_recipe_dir=True) %}
 
 package:
   name: {{ name }}
@@ -21,17 +22,18 @@ build:
 
 requirements:
   host:
-    - python >=3.12
+    - python {{ pyproject["project"]["requires-python"] }}
     - pip
     - flit-core >=3.4,<4
   run:
-    - python >=3.12
-    - mdanalysis >=2.10.0,<3.0
-    - biopython >=1.87,<2
-    - rdkit >=2025.9.5,<2026
-    - linkml >=1.11.1,<2.0
-    - python-xxhash >=3.6,<5.0
-    - biosim-schema >=1.0,<2.0
+    - python {{ pyproject["project"]["requires-python"] }}
+    {% for dependency in pyproject["project"]["dependencies"] %}
+    {% if dependency.startswith("xxhash") %}
+    - python-{{ dependency }}
+    {% else %}
+    - {{ dependency | lower }}
+    {% endif %}
+    {% endfor %}
 
 test:
   imports:
