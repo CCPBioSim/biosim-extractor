@@ -161,46 +161,56 @@ TOPTRAJ_AUTO_EXTRACT = {
         lambda: u.atoms.n_atoms if getattr(u, "atoms", None) is not None else None
     ),
     "total_molecule_count": lambda u: safe_extract(
-        lambda: len(u.atoms.fragments)
-        if getattr(u, "atoms", None) is not None and hasattr(u.atoms, "fragments")
-        else None
+        lambda: (
+            len(u.atoms.fragments)
+            if getattr(u, "atoms", None) is not None and hasattr(u.atoms, "fragments")
+            else None
+        )
     ),
     "frame_count": lambda u: safe_extract(
-        lambda: len(u.trajectory)
-        if getattr(u, "trajectory", None) is not None
-        else None
+        lambda: (
+            len(u.trajectory) if getattr(u, "trajectory", None) is not None else None
+        )
     ),
     "system_charge": lambda u: safe_extract(
-        lambda: sum(charges)
-        if (charges := getattr(u.atoms, "charges", None)) is not None
-        else None
+        lambda: (
+            sum(charges)
+            if (charges := getattr(u.atoms, "charges", None)) is not None
+            else None
+        )
     ),
     "box_dimensions": lambda u: safe_extract(
-        lambda: u.trajectory[0].dimensions[:3]
-        if (
-            getattr(u, "trajectory", None) is not None
-            and len(u.trajectory) > 0
-            and u.trajectory[0].dimensions is not None
+        lambda: (
+            u.trajectory[0].dimensions[:3]
+            if (
+                getattr(u, "trajectory", None) is not None
+                and len(u.trajectory) > 0
+                and u.trajectory[0].dimensions is not None
+            )
+            else None
         )
-        else None
     ),
     "box_angles": lambda u: safe_extract(
-        lambda: u.trajectory[0].dimensions[3:]
-        if (
-            getattr(u, "trajectory", None) is not None
-            and len(u.trajectory) > 0
-            and u.trajectory[0].dimensions is not None
+        lambda: (
+            u.trajectory[0].dimensions[3:]
+            if (
+                getattr(u, "trajectory", None) is not None
+                and len(u.trajectory) > 0
+                and u.trajectory[0].dimensions is not None
+            )
+            else None
         )
-        else None
     ),
     "box_type": lambda u: safe_extract(
-        lambda: classify_box(u.trajectory[0].dimensions)
-        if (
-            getattr(u, "trajectory", None) is not None
-            and len(u.trajectory) > 0
-            and u.trajectory[0].dimensions is not None
+        lambda: (
+            classify_box(u.trajectory[0].dimensions)
+            if (
+                getattr(u, "trajectory", None) is not None
+                and len(u.trajectory) > 0
+                and u.trajectory[0].dimensions is not None
+            )
+            else None
         )
-        else None
     ),
     "water": lambda u: safe_extract(lambda: len(u.select_atoms("water")) > 0),
     "positions": lambda u: safe_extract(
@@ -234,9 +244,9 @@ MOLID_AUTO_EXTRACT = {
     "molecule_charge": lambda fragment: safe_extract(
         lambda: sum(list(fragment.atoms.charges))
     ),
-    "molecular_weight": lambda fragment: float(sum(fragment.masses))
-    if hasattr(fragment, "masses")
-    else None,
+    "molecular_weight": lambda fragment: (
+        float(sum(fragment.masses)) if hasattr(fragment, "masses") else None
+    ),
     "simulated_particle_names": lambda fragment: (
         ", ".join(list(fragment.atoms.names))
         if len(fragment.resnames) > 0 and len(set(fragment.resnames)) == 1

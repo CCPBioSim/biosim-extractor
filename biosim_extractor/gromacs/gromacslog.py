@@ -11,7 +11,10 @@ from biosim_extractor.helpers.log_utils import parse_value
 
 
 class GromacsLogParser:
-    """Parser for GROMACS ``.log`` files, extracting header, input parameters, summary, and averages."""
+    """Parser for GROMACS ``.log`` files.
+
+    Extracts the header, input parameters, summary and averages.
+    """
 
     def __init__(self, filepath):
         """
@@ -50,7 +53,10 @@ class GromacsLogParser:
     # HEADER
     # =========================
     def _parse_header(self):
-        """Extract top-level key-value fields from the file header (e.g. GROMACS version, compiler)."""
+        """Extract top-level key-value fields from the file header.
+
+        For example the GROMACS version and compiler.
+        """
         keys = [
             "Executable",
             "Data prefix",
@@ -181,7 +187,7 @@ class GromacsLogParser:
                 for block in range(4):
                     headers = lines[j + 1 + block * 2].split()
                     values = lines[j + 2 + block * 2].split()
-                    for h, v in zip(headers, values):
+                    for h, v in zip(headers, values, strict=False):
                         entry[h] = parse_value(v)
 
                 # parse last line with Pres., DC, bar
@@ -202,7 +208,10 @@ class GromacsLogParser:
     # AVERAGES
     # =========================
     def _parse_averages(self):
-        """Extract the ``A V E R A G E S`` block, including energies, box dimensions, and tensors."""
+        """Extract the ``A V E R A G E S`` block.
+
+        Includes energies, box dimensions, and tensors.
+        """
         lines = self.lines
         n = len(lines)
         i = 0
@@ -234,7 +243,7 @@ class GromacsLogParser:
                             (headers[i : i + 15].split())
                             for i in range(0, len(headers), 15)
                         ]
-                        for h, v in zip(headers_split[:-1], values):
+                        for h, v in zip(headers_split[:-1], values, strict=False):
                             h = " ".join(h)
                             averages[h] = parse_value(v)
                     i += 8
@@ -244,7 +253,7 @@ class GromacsLogParser:
                 elif line.strip().startswith("Box-"):
                     headers = line.split()
                     values = lines[i + 1].split()
-                    for h, v in zip(headers, values):
+                    for h, v in zip(headers, values, strict=False):
                         averages[h] = parse_value(v)
                     i += 2
                     continue
@@ -253,7 +262,7 @@ class GromacsLogParser:
                 elif line.strip().startswith("T-Protein"):
                     headers = line.split()
                     values = lines[i + 1].split()
-                    for h, v in zip(headers, values):
+                    for h, v in zip(headers, values, strict=False):
                         averages[h] = parse_value(v)
                     i += 2
                     continue

@@ -224,7 +224,9 @@ def test_metadata_populator(monkeypatch, tmp_path):
     # Write schema to file
     schema_path = tmp_path / "schema.json"
     schema_path.write_text(
-        '{"reverse": {"amber": {"foo": {"by_path": {"SimulationMetadata.bar": {}}}}}, "forward": {"amber": {"SimulationMetadata.bar": [{"key": "foo", "unit": "nm"}]}}}'
+        '{"reverse": {"amber": {"foo": {"by_path": {"SimulationMetadata.bar": {}}}}}, '
+        '"forward": {"amber": {"SimulationMetadata.bar": '
+        '[{"key": "foo", "unit": "nm"}]}}}'
     )
 
     # Patch AmberLogParser to return engine_data
