@@ -1,3 +1,4 @@
+name: "BioSimDB Extractor"
 shortdesc: "A tool for extracting metadata from MD simulation outputs"
 longdesc: "biosim-extractor is a tool for extracting simulation data from output files produced from molecular dynamics (MD) simulations of biomolecules and validating against biosim-schema"
 category: "data-tools"
