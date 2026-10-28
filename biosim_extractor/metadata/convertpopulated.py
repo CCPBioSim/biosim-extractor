@@ -20,16 +20,18 @@ def _to_numbers(value):
 
 def convert_populated_metadata_units(metadata: dict) -> dict:
     """
-    Recursively convert all value/value_unit and vector_value/value_unit pairs in a metadata dict to standard units.
+    Recursively convert all value/value_unit and vector_value/value_unit pairs in a
+    metadata dict to standard units.
 
     Args:
-        metadata (dict): The metadata dictionary to process. This should contain nested dictionaries
-                         where physical quantities are represented as {'value': ..., 'value_unit': ...}
+        metadata (dict): The metadata dictionary to process. This should contain
+                         nested dictionaries where physical quantities are
+                         represented as {'value': ..., 'value_unit': ...}
                          or {'vector_value': ..., 'value_unit': ...}.
 
     Returns:
-        dict: A new metadata dictionary with all values converted to standard units as defined by UnitConverter.
-              The structure of the input is preserved.
+        dict: A new metadata dictionary with all values converted to standard units
+              as defined by UnitConverter. The structure of the input is preserved.
 
     Raises:
         ValueError: If a unit is unknown or conversion fails.

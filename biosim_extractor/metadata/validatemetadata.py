@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Validation utilities for extracted MD simulation metadata against the biosim LinkML schema.
+Validation utilities for extracted MD simulation metadata against the biosim LinkML
+schema.
 """
 
 import os
@@ -50,15 +51,19 @@ def validate_metadata(result, biosimschema_path=None, strict=False):
 
     Args:
         result: Populated metadata dictionary to validate.
-        biosimschema_path: Path or URL to the biosim schema YAML. If ``None``, validation is skipped.
-        strict: If ``True``, raises ``MetadataValidationError`` on validation errors; otherwise emits a warning.
+        biosimschema_path: Path or URL to the biosim schema YAML. If ``None``,
+            validation is skipped.
+        strict: If ``True``, raises ``MetadataValidationError`` on validation errors;
+            otherwise emits a warning.
     """
     if biosimschema_path:
         errors = validate_extracted(result, biosimschema_path)
         if errors:
             if strict:
                 raise MetadataValidationError(errors)
-            warnings.warn("Schema validation warnings:\n" + "\n".join(errors))
+            warnings.warn(
+                "Schema validation warnings:\n" + "\n".join(errors), stacklevel=1
+            )
 
 
 def validate_extracted(instance, schema_path):
@@ -67,8 +72,11 @@ def validate_extracted(instance, schema_path):
     Uses a two-pass strategy to work around LinkML's JSON-Schema compiler not
     supporting nested array (matrix) constraints:
 
-    1. Custom pass: checks every ``vector_value`` field for correct numeric types and (for matrices) consistent row lengths.
-    2. LinkML pass: matrix ``vector_value`` fields are stripped and the remainder is validated with linkml.validator.validate, which enforces types, enums, required fields, and cardinality on flat vectors.
+    1. Custom pass: checks every ``vector_value`` field for correct numeric types and
+       (for matrices) consistent row lengths.
+    2. LinkML pass: matrix ``vector_value`` fields are stripped and the remainder is
+       validated with linkml.validator.validate, which enforces types, enums,
+       required fields, and cardinality on flat vectors.
 
     The working directory is temporarily changed to the directory containing
     schema_path so that relative $import paths inside the schema resolve correctly.

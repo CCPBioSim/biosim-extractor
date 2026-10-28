@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Extract and populate metadata from a single MD engine log file, validated against the biosim-schema.
+Extract and populate metadata from a single MD engine log file, validated against
+the biosim-schema.
 Preserves canonical casing from schema mappings.
 """
 
 import argparse
 import json
-from typing import Any, Dict
+from typing import Any
 
 from biosim_schema.utils.paths import engine_mappings_path, schema_yaml_path
 
@@ -24,8 +25,10 @@ from biosim_extractor.units.unitconversion import UnitConverter
 # -----------------------------
 
 
-def flatten_dict(d: Dict) -> Dict:
-    """Recursively flatten a nested dict, keeping the first occurrence of duplicate keys.
+def flatten_dict(d: dict) -> dict:
+    """Recursively flatten a nested dict.
+
+    Keeps the first occurrence of duplicate keys.
 
     Args:
         d: Nested dictionary to flatten.
@@ -45,7 +48,7 @@ def flatten_dict(d: Dict) -> Dict:
     return items
 
 
-def get_by_path(d: Dict, path: str):
+def get_by_path(d: dict, path: str):
     """Retrieve a value from a nested dict using a dot-separated path.
 
     Args:
@@ -65,8 +68,10 @@ def get_by_path(d: Dict, path: str):
     return d
 
 
-def assign_by_path(d: Dict, path: str, value: Any):
-    """Set a value in a nested dict at a dot-separated path, creating intermediate dicts as needed.
+def assign_by_path(d: dict, path: str, value: Any):
+    """Set a value in a nested dict at a dot-separated path.
+
+    Creates intermediate dicts as needed.
 
     Args:
         d: Dictionary to modify in place.
@@ -83,7 +88,7 @@ def assign_by_path(d: Dict, path: str, value: Any):
     d[keys[-1]] = value
 
 
-def add_to_path(d: Dict, path: str, value: Any):
+def add_to_path(d: dict, path: str, value: Any):
     """Append a value to a list in a nested dict at a dot-separated path.
 
     Args:
@@ -156,7 +161,7 @@ def normalize_key(value: Any) -> str:
     return str(value).strip().lower()
 
 
-def transform_value(value: Any, rules: Dict):
+def transform_value(value: Any, rules: dict):
     """Map a raw engine value to its canonical schema equivalent using a rules dict.
 
     Args:
@@ -191,9 +196,11 @@ def transform_value(value: Any, rules: Dict):
 
 
 class MetadataPopulator:
-    """Orchestrates extraction of MD engine metadata and population of metadata validated against the biosim schema.
+    """Orchestrates extraction of MD engine metadata and population of metadata
+    validated against the biosim schema.
 
-    Supports log-file-based engines (Amber, GROMACS) and topology/trajectory parsing via MDAnalysis.
+    Supports log-file-based engines (Amber, GROMACS) and topology/trajectory parsing
+    via MDAnalysis.
     """
 
     def __init__(
@@ -216,7 +223,8 @@ class MetadataPopulator:
 
         Use cases:
             1. Batch processing logs via CLI (`--logfile`, `--engine`).
-            2. Populating a single simulation from top/traj without logs via MDAnalysis integration.
+            2. Populating a single simulation from top/traj without logs via
+               MDAnalysis integration.
 
         Args (constructor):
             schema_path: Path to the engine mapping JSON file.
@@ -339,7 +347,7 @@ class MetadataPopulator:
     # Mapping logic
     # -----------------------------
 
-    def apply_mapping(self) -> Dict:
+    def apply_mapping(self) -> dict:
         """
         Apply mapping rules to engine data to produce schema-compliant output.
 
@@ -374,7 +382,8 @@ class MetadataPopulator:
                 if len(rules) == 0:  # check for unit conversion
                     for term in forward_mapping[path]:
                         if "unit" in term and term["key"] == param:
-                            # Check if this is a vector value based on path or value type
+                            # Check if this is a vector value based on path or
+                            # value type
                             is_vector = (
                                 "box_dimensions" in path
                                 or "box_angles" in path
@@ -429,7 +438,8 @@ class MetadataPopulator:
             for _mol_index, mol_data in engine_data["molecule_ids"].items():
                 transformed_molecule = {}
 
-                # Process each property of the molecule through the transformation pipeline
+                # Process each property of the molecule through the transformation
+                # pipeline
                 for prop_name, prop_value in mol_data.items():
                     # Check if this molecule property has mapping rules
                     if prop_name in reverse_mapping:
@@ -481,10 +491,12 @@ class MetadataPopulator:
         Args:
             value: Numeric value or list of values to convert.
             term: Forward-mapping entry containing ``"unit"`` and ``"key"``.
-            is_vector: If ``True``, stores the result under ``"vector_value"`` instead of ``"value"``.
+            is_vector: If ``True``, stores the result under ``"vector_value"``
+                instead of ``"value"``.
 
         Returns:
-            Dictionary with ``"value"`` (or ``"vector_value"``) and ``"value_unit"`` keys.
+            Dictionary with ``"value"`` (or ``"vector_value"``) and ``"value_unit"``
+            keys.
         """
         unit = (
             self.converter.get_target_unit(term["unit"])
@@ -522,7 +534,8 @@ def resolve_schema_inputs(args):
 
     If either path argument (`mappingschema`, `biosimschema`) is missing, the function
     fetches a bundled schema release (optionally updating if requested). This ensures
-    downstream processing has valid JSON/YAML sources without requiring manual caching setup
+    downstream processing has valid JSON/YAML sources without requiring manual caching
+    setup
     """
     mapping_path = args.mappingschema or args.mapping_path
     biosim_path = args.biosimschema or args.biosim_path
@@ -564,7 +577,9 @@ def parse_args():
     parser.add_argument(
         "mappingschema",
         nargs="?",
-        help="Path to engine mapping schema JSON (optional if schema bundle is fetched).",
+        help=(
+            "Path to engine mapping schema JSON (optional if schema bundle is fetched)."
+        ),
     )
 
     parser.add_argument(
@@ -579,7 +594,10 @@ def parse_args():
     parser.add_argument(
         "--schema-cache-dir",
         default=None,
-        help="Directory for cached biosim-schema bundles (default: BIOSIM_SCHEMA_CACHE_DIR or /tmp/biosim-schema-cache).",
+        help=(
+            "Directory for cached biosim-schema bundles (default: "
+            "BIOSIM_SCHEMA_CACHE_DIR or /tmp/biosim-schema-cache)."
+        ),
     )
     parser.add_argument(
         "--update-schema",
@@ -610,7 +628,11 @@ def parse_args():
 
 
 def main():
-    """Entry point: parse args, resolve schema sources, run pipeline, validate, write output."""
+    """Entry point.
+
+    Parses args, resolves schema sources, runs the pipeline, validates and writes
+    output.
+    """
     args = parse_args()
 
     # use schema if paths not set

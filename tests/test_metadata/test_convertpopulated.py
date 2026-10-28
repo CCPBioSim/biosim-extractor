@@ -33,6 +33,6 @@ def test_error_on_unknown_unit():
     data = {"foo": {"value": 1, "value_unit": "unknown_unit"}}
     try:
         convert_populated_metadata_units(data)
-        assert False, "Should have raised ValueError"
+        raise AssertionError("Should have raised ValueError")
     except ValueError:
         pass

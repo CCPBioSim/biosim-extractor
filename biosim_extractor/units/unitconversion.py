@@ -6,7 +6,7 @@ This module provides the UnitConverter class for converting scientific values
 between different units, standardizing to a chosen system (default: SI-like).
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 
 class UnitConverter:
@@ -15,14 +15,14 @@ class UnitConverter:
     Converts values to a chosen standard unit system.
     """
 
-    def __init__(self, standard_units: Optional[Dict[str, str]] = None) -> None:
+    def __init__(self, standard_units: dict[str, str] | None = None) -> None:
         """
         Initialize the UnitConverter.
 
         Args:
             standard_units (dict, optional): Mapping of unit types to standard units.
         """
-        self.standards: Dict[str, str] = standard_units or {
+        self.standards: dict[str, str] = standard_units or {
             "length": "nm",  # nanometers
             "volume": "nm³",  # nanometers cubed
             "time": "s",  # seconds
@@ -41,7 +41,7 @@ class UnitConverter:
         }
 
         # Conversion factors to standard units
-        self.factors: Dict[str, Dict[str, Any]] = {
+        self.factors: dict[str, dict[str, Any]] = {
             "length": {
                 "Å": 0.1,
                 "A": 0.1,
@@ -131,18 +131,18 @@ class UnitConverter:
         }
 
         # Create reverse lookup: unit -> unit_type
-        self.unit_to_type: Dict[str, str] = {}
+        self.unit_to_type: dict[str, str] = {}
         for unit_type, units in self.factors.items():
             for unit in units.keys():
                 self.unit_to_type[unit] = unit_type
 
     def convert(
         self,
-        value: Union[float, List[float]],
+        value: float | list[float],
         from_unit: str,
-        unit_type: Optional[str] = None,
-        decimals: Optional[int] = None,
-    ) -> Union[float, List[float]]:
+        unit_type: str | None = None,
+        decimals: int | None = None,
+    ) -> float | list[float]:
         """
         Convert a value from one unit to the standard unit.
 
@@ -193,10 +193,10 @@ class UnitConverter:
 
     def convert_with_unit(
         self,
-        value: Union[float, List[float]],
+        value: float | list[float],
         from_unit: str,
-        unit_type: Optional[str] = None,
-    ) -> Tuple[Union[float, List[float]], str]:
+        unit_type: str | None = None,
+    ) -> tuple[float | list[float], str]:
         """
         Convert a value and return both the value and the target unit.
 
@@ -241,10 +241,10 @@ class UnitConverter:
 
     def __call__(
         self,
-        value: Union[float, List[float]],
+        value: float | list[float],
         from_unit: str,
-        unit_type: Optional[str] = None,
-    ) -> Union[float, List[float]]:
+        unit_type: str | None = None,
+    ) -> float | list[float]:
         """
         Convert a value using the instance as a callable.
 
@@ -258,7 +258,7 @@ class UnitConverter:
         """
         return self.convert(value, from_unit, unit_type)
 
-    def get_unit_type(self, unit: str) -> Optional[str]:
+    def get_unit_type(self, unit: str) -> str | None:
         """
         Get the unit type for a given unit string.
 
