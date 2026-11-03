@@ -1,24 +1,38 @@
-BioSim Extractor Documentation
-==============================
+:html_theme.sidebar_secondary.remove:
 
-``biosim-extractor`` is available at http://github.com/CCPBioSim/biosim-extractor
+biosim-extractor
+================
 
-.. image:: /_static/logos/biosim-extractor-logo-dark-text.png
-   :width: 250px
-   :align: center
-   :class: only-light
+.. ccpbiosim-hero::
+   :logo-light: _static/logos/biosim-extractor-logo-dark.png
+   :logo-dark: _static/logos/biosim-extractor-logo-light.png
+   :logo-alt: biosim-extractor logo
+   :tagline: biosim-extractor
+   :button: installation | Get started
+   :github: CCPBioSim/biosim-extractor
 
-.. image:: /_static/logos/biosim-extractor-logo-light-text.png
-   :width: 250px
-   :align: center
-   :class: only-dark
+   A toolkit for extracting standardised metadata from molecular dynamics (MD) simulations
 
-A toolkit for extracting standardised metadata from molecular dynamics (MD) simulations.
+BioSim Extractor provides tools to parse, extract, and standardise metadata from
+MD simulation outputs (AMBER, GROMACS, etc.), and validate against
+`biosim-schema <https://github.com/CCPBioSim/biosim-schema>`_.
 
-Overview
---------
+Quick start
+-----------
 
-BioSim Extractor provides tools to parse, extract, and standardize metadata from MD simulation outputs (AMBER, GROMACS, etc.), and validate against `biosim-schema <https://github.com/CCPBioSim/biosim-schema>`_.
+.. tab-set::
+
+   .. tab-item:: pip
+
+      .. code-block:: bash
+
+         pip install biosim-extractor
+
+   .. tab-item:: Conda
+
+      .. code-block:: bash
+
+         conda install -c conda-forge -c ccpbiosim biosim-extractor
 
 Features
 --------
@@ -26,32 +40,49 @@ Features
 - Parse log files from multiple MD engines
 - Extract topology and trajectory metadata
 - Standardise units and schema
-- Validate metadata against biosim-schema `biosim-schema <https://github.com/CCPBioSim/biosim-schema>`_
+- Validate metadata against `biosim-schema <https://github.com/CCPBioSim/biosim-schema>`_
 
-Getting Started
----------------
+Explore the documentation
+-------------------------
 
-See :doc:`installation` for setup instructions and :doc:`usage` for examples.
+.. grid:: 1 2 2 2
+   :gutter: 3
 
-API Reference
--------------
+   .. grid-item-card:: 📦 Installation
+      :link: installation
+      :link-type: doc
 
-The full API documentation is available in :doc:`api`.
+      Install biosim-extractor with pip or Conda, or from source.
 
-Contents
---------
+   .. grid-item-card:: 🚀 Usage
+      :link: usage
+      :link-type: doc
+
+      Extract and validate metadata from the command line.
+
+   .. grid-item-card:: 📖 API
+      :link: reference/biosim_extractor/index
+      :link-type: doc
+
+      Reference for the biosim-extractor package.
+
+   .. grid-item-card:: 👩‍💻 Contributing
+      :link: contributing
+      :link-type: doc
+
+      Setting up a development environment and contributing.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
-   installation
-   usage
-   contributing
-   api
+   Installation <installation>
+   Usage <usage>
+   API <reference/biosim_extractor/index>
+   Contributing <contributing>
 
 Funding
-=======
+-------
 
 Contributors to biosim-extractor were supported by
 
@@ -66,9 +97,3 @@ Contributors to biosim-extractor were supported by
 .. image:: _static/logos/CCPBioSim-logo.png
    :height: 100px
    :target: https://www.ccpbiosim.ac.uk/
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
