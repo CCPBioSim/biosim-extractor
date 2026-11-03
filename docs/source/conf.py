@@ -6,9 +6,11 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import importlib.metadata
+
 project = "biosim-extractor"
 copyright = "2026, CCPBioSim"
-release = "1.2.1"
+release = importlib.metadata.version("biosim-extractor")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
